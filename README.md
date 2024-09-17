@@ -90,13 +90,13 @@ Maximized window button has been replaced and switches between the 2 OSC instead
 
 # Tog4in1
 
-![1](https://raw.githubusercontent.com/zTnR/mpv-osc-tog4in1/main/Preview1.png)
+![1](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview1.png)
 
-![2](https://raw.githubusercontent.com/zTnR/mpv-osc-tog4in1/main/Preview2.png)
+![2](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview2.png)
 
-![2](https://raw.githubusercontent.com/zTnR/mpv-osc-tog4in1/main/Preview3.png)
+![2](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview3.png)
 
-![4](https://raw.githubusercontent.com/zTnR/mpv-osc-tog4in1/main/Preview4.png)
+![4](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview4.png)
 
 # Specifics
 
