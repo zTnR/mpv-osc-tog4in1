@@ -1,4 +1,5 @@
 
+![1](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview0.png)
 
 OSC 1 is based on mpv-modern-x-compact
 
