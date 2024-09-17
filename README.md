@@ -41,6 +41,16 @@ border=no
 
 Compatible with [thumbfast](https://github.com/po5/thumbfast)
 
+# Tog4in1
+
+![1](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview1.png)
+
+![2](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview2.png)
+
+![2](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview3.png)
+
+![4](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview4.png)
+
 # Buttons / functionalities
 
 ### Top right corner
@@ -88,16 +98,6 @@ Maximized window button has been replaced and switches between the 2 main UIs in
 - Toggle audio      > Left clic       : Next audio track
 - Toggle audio      > Right clic      : display audio track list osd
 ```
-
-# Tog4in1
-
-![1](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview1.png)
-
-![2](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview2.png)
-
-![2](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview3.png)
-
-![4](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview4.png)
 
 # Specifics
 
