@@ -1,9 +1,9 @@
 
 ![1](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview0.png)
 
-OSC 1 is based on mpv-modern-x-compact
+UI 1 is based on mpv-modern-x-compact.
 
-OSC 2 is based on vanilla PotPlayer
+UI 2 is based on vanilla PotPlayer.
 
 # Concept
 
@@ -46,7 +46,7 @@ Compatible with [thumbfast](https://github.com/po5/thumbfast)
 ### Top right corner
 
 ```
-Maximized window button has been replaced and switches between the 2 OSC instead.
+Maximized window button has been replaced and switches between the 2 main UIs instead.
 ```
 
 ### Seekbar
