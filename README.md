@@ -51,7 +51,7 @@ Compatible with [thumbfast](https://github.com/po5/thumbfast)
 
 ![4](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview4.png)
 
-# Buttons / functionalities
+# Buttons / Other
 
 ### Top right corner
 
