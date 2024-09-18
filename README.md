@@ -1,5 +1,5 @@
 
-![1](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview0.png)
+![1](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/preview/Preview0.png)
 
 UI 1 is based on mpv-modern-x-compact.
 
@@ -43,13 +43,13 @@ Compatible with [thumbfast](https://github.com/po5/thumbfast)
 
 # Tog4in1
 
-![1](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview1.png)
+![1](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/preview/Preview1.png)
 
-![2](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview2.png)
+![2](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/preview/Preview2.png)
 
-![2](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview3.png)
+![2](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/preview/Preview3.png)
 
-![4](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/Preview4.png)
+![4](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/preview/Preview4.png)
 
 # Buttons / Other
 
