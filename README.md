@@ -62,13 +62,13 @@ Maximized window button has been replaced and switches between the 2 main UIs in
 ### Seekbar
 
 ```
-- Left timer   > Left click     : Show / hide title in OSC
-- Left timer   > Right click    : Show / hide title in top bar
+- Left timer        > Left click       : Show / hide title in OSC
+- Left timer         > Right click     : Show / hide title in top bar
 
-- Right timer  > Right click    : Shitch between default / minimal UI versions
+- Right timer       > Right click      : Shitch between default / minimal UI versions
 
-- Seekbar      > Right click    : Chapters on / off
-- Seekbar      > Mouse wheel    : Increase / decrease seekbar height
+- Seekbar           > Right click      : Chapters on / off
+- Seekbar           > Mouse wheel      : Increase / decrease seekbar height
 ```
 
 ### Buttons
@@ -124,7 +124,27 @@ showIcons = true,            -- show 'advanced buttons'
 onTopWhilePlaying = true,    -- Toggle On top while playing
 oscMode = "default",         -- Toggle OSC Modes default / onpause / always
 heightoscShowHidearea = 120, -- Height show / hide osc area
-``` 
+```
+
+Content saveparams.ini
+```
+showThumbfast=true
+showTooltip=true
+showChapters=false
+showTitle=false
+showIcons=true
+oscMode=default
+seekbarColorIndex=8
+seekbarHeight=0
+modernTog=false
+minimalUI=false
+hidetimeout=0
+fadeduration=0
+hidetimeoutMouseMove=1000
+fadedurationMouseMove=500
+volume=20
+```
+
 
 # Credits
 
