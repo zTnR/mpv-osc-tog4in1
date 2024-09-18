@@ -1,5 +1,5 @@
 
-![0]([https://github.com/zTnR/mpv-osc-tog4in1/blob/main/preview/Preview0.jpg)
+![0](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/preview/Preview0.jpg)
 
 UI 1 is based on mpv-modern-x-compact.
 
