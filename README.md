@@ -30,7 +30,7 @@ In the root ```mpv``` or ```mpvnet``` directory :
 
 [tog4in1.lua](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/tog4in1.lua) in the ```script``` folder.
 
-_.ttf_ (icons) files in the ```font``` folder.
+Copy the ```font``` folder.
 
 In _mpv.conf_ : 
 ```
