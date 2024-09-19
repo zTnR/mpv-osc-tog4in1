@@ -142,7 +142,9 @@ hidetimeout=0
 fadeduration=0
 hidetimeoutMouseMove=1000
 fadedurationMouseMove=500
-volume=20
+volume=100
+windowcontrols_title=false
+timetotal=true
 ```
 
 
