@@ -35,8 +35,9 @@ Copy the ```font``` folder.
 In _mpv.conf_ : 
 ```
 #remove borders to have access to the top right icons, switching UI using the maximize window one
-
 border=no
+#for onTopWhilePlaying = true working at launch
+ontop=yes
 ```
 
 Compatible with [thumbfast](https://github.com/po5/thumbfast)
