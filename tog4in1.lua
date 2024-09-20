@@ -1,16 +1,3 @@
--- mpv-osc-morden by maoiscat
--- email:valarmor@163.com
--- https://github.com/maoiscat/mpv-osc-morden
-
--- fork by cyl0
--- https://github.com/cyl0/MordenX
-
--- forked again by dexeonify
--- https://github.com/dexeonify/mpv-config/blob/main/scripts/modernx.lua
-
--- forked once again by 1-minute-to-midnight
--- https://github.com/1-minute-to-midnight/mpv-modern-x-compact/
-
 local ipairs,loadfile,pairs,pcall,tonumber,tostring = ipairs,loadfile,pairs,pcall,tonumber,tostring
 local debug,io,math,os,string,table,utf8 = debug,io,math,os,string,table,utf8
 local min,max,floor,ceil,huge = math.min,math.max,math.floor,math.ceil,math.huge
@@ -48,7 +35,6 @@ local user_opts = {
     minmousemove = -1,                  -- min amount of pixels for OSC to show up (Don't show < 0, show >= 0)
     layout = "modernx",                 -- set thumbnail layout
     title = "${filename}",           	-- string compatible with property-expansion to be shown as OSC title
-    tooltipborder = 0.1,                -- border of tooltip in bottom/topbar
     timetotal = false,                  -- display total time instead of remaining time?
     visibility = "auto",                -- only used at init to set visibility_mode(...)
     windowcontrols = "auto",            -- whether to show window controls
@@ -529,9 +515,9 @@ mp.register_script_message(message.debug, function()
     msg.info("tn_osc:", tn_osc and utils.to_string(tn_osc) or "nil")
 end)
 
--------------------------
--- Save Params in file --
--------------------------
+-------------
+-- tog4in1 --
+-------------
 
 --https://github.com/mpv-player/mpv/issues/3201#issuecomment-2016505146
 
@@ -676,20 +662,28 @@ local function load_file()
         end
 
         local timetotal = state_data:match("timetotal=(%a+)")
-msg.info(">> LOAD timetotal " .. utils.to_string(timetotal))
         if timetotal then
 			user_opts.timetotal = true
 			if timetotal == "false" then
 				user_opts.timetotal = false
 			end
         end
-msg.info(">> LOAD timetotal " .. utils.to_string(user_opts.timetotal))
     end
 end
 
 -- Load params file at startup
 if user_opts.saveFile then
 	load_file()
+end
+
+-- create style
+function createStyle(blur, bord, color1, color2, font, icon)
+	local style =  "{\\blur"..blur.."\\bord"..bord.."\\1c&H" .. color1 .. "&\\3c&H" .. color2 .. "&"
+	if font
+	then
+		style = style.."\\fs"..font.."\\fn"..icon
+	end
+	return style.."}"
 end
  
 -----------------
@@ -732,7 +726,7 @@ local alignments = {
   [9] = function () return x-w, y, x, y+h end,
 }
 
--- OSC colors : seekbar / hover (hexa codes are reversed)
+-- osc colors : seekbar / hover (GBR)
 local osc_palette = {
 	[1] 		= "7f7f00", -- cyan
 	[2]			= "E39C42", -- blue
@@ -746,7 +740,7 @@ local osc_palette = {
 	[10]		= "e9e9e9", -- white
 }
 
--- OSC colors : background / buttons (hexa codes are reversed)
+-- osc colors : background / buttons (GBR)
 local black 			= "000000"	-- OSC background color
 local white 			= "E9E9E9"	-- Play / time left color
 local grey 				= "808080"	-- Other buttons color (grey)
@@ -755,49 +749,56 @@ if user_opts.UIAllWhite then
 	user_opts.alphaWinCtrl = 0		-- Window control buttons max opacity (white)
 end
 
+-- osc styles - params : blur, bord, color1, color2, font, icon
 local osc_styles = {
-    transBg = "{\\blur75\\bord" .. "100" .. "\\1c&H000000&\\3c&H" .. black .. "&}",
-    transBgMini = "{\\blur75\\bord" .. "75" .. "\\1c&H000000&\\3c&H" .. black .. "&}",
-    transBgPot = "{\\blur0\\bord" .. "70" .. "\\1c&H000000&\\3c&H" .. black .. "&}",
-    transBgPotMini = "{\\blur0\\bord" .. "30" .. "\\1c&H000000&\\3c&H" .. black .. "&}",
-    seekbarBg = "{\\blur0\\bord0\\1c&H" .. white .. "&}",
-	seekbarFg = "{\\blur2\\bord0\\1c&H" .. osc_palette[user_opts.seekbarColorIndex] .. "&}",
 
-    bigButtons = "{\\blur0\\bord0\\1c&H" .. white .. "&\\3c&H".. white .."&\\fs22\\fnmaterial-design-iconic-font}",
-    bigButtonsPot = "{\\blur0\\bord0\\1c&H" .. white .. "&\\3c&H".. white .."&\\fs21\\fnmaterial-design-iconic-font}",
-    mediumButtons = "{\\blur0\\bord0\\1c&H" .. grey .. "&\\3c&H" .. white .."&\\fs16\\fnmodernx-osc-icon}",
-    mediumButtons2 = "{\\blur0\\bord0\\1c&H" .. grey .. "&\\3c&H" .. white .."&\\fs18\\fnmaterial-design-iconic-font}",
-    smallButtons = "{\\blur0\\bord0\\1c&H" .. grey .. "&\\3c&H" .. white .."&\\fs15\\fnmodernx-osc-icon}",
-    smallButtonSpeed = "{\\blur0\\bord0\\1c&H" .. grey .. "&\\3c&H" .. white .."&\\fs13\\fnmodernx-osc-icon}",
-    volButton = "{\\blur0\\bord0\\1c&H" .. grey .. "&\\3c&H" .. white .."&\\fs15\\fnmaterial-design-iconic-font}",
-	ctrlLoop = "{\\blur0\\bord0\\1c&H".. grey .."&\\3c&H".. white .."&\\fs11\\fnoscc}",
-	togTooltip = "{\\blur0\\bord0\\1c&H".. grey .."&\\3c&H".. white .."&\\fs16\\fnmpv-osd-symbols}",
+    transBg = createStyle(75, 100, black, black, nil, nil),
+	transBgMini = createStyle(75, 75, black, black, nil, nil),
+	transBgPot = createStyle(0, 70, black, black, nil, nil),
+	transBgPotMini = createStyle(0, 30, black, black, nil, nil),
+	seekbarBg = createStyle(0, 0, white, white, nil, nil),
+	seekbarFg = createStyle(0, 0, osc_palette[user_opts.seekbarColorIndex], white, nil, nil),
 
-    timecodeL = "{\\blur0\\bord0\\1c&H" .. white .. "&\\3c&H000000&\\fs15\\fn" .. user_opts.titlefont .. "}",
-    timecodeR = "{\\blur0\\bord0\\1c&H" .. grey .. "&\\3c&H000000&\\fs16\\fn" .. user_opts.titlefont .. "}",
-	titlePotMini = "{\\blur0\\bord0\\1c&H" .. grey .. "&\\3c&H000000&\\fs16\\fn" .. user_opts.titlefont .. "}",
-    tooltip = "{\\blur0\\bord" .. user_opts.tooltipborder .. "\\1c&H" .. white .. "&\\3c&H000000&\\fs13}",
-    vidTitle = "{\\blur0\\bord0\\1c&H" ..white.. "&\\3c&H0\\fs14\\q2\\fn" .. user_opts.titlefont .. "}",
-
-    wcButtons = "{\\1c&" .. white .. "&\\fs15\\fnmodernx-osc-icon}",
-	wcSwitch = "{\\1c&" .. white .. "&\\fs17\\fnmpv-osd-symbols}",
-    wcTitle = "{\\1c&" .. white .. "&\\fs14\\q2\\fn" .. user_opts.titlefont .. "}",
-    wcBar = "{\\1c&H" .. black .. "}",
-
-    elementDown = "{\\1c&H999999&}",
-    elementHover = "{\\blur0\\1c&H" .. osc_palette[user_opts.seekbarColorIndex] .. "&}"
+    bigButtons = createStyle(0, 0, white, white, 22, "material-design-iconic-font"),
+    bigButtonsPot = createStyle(0, 0, white, white, 21, "material-design-iconic-font"),
+    mediumButtons = createStyle(0, 0, grey, white, 16, "modernx-osc-icon"),
+    mediumButtons2 = createStyle(0, 0, grey, white, 18, "material-design-iconic-font"),
+    smallButtons = createStyle(0, 0, grey, white, 15, "modernx-osc-icon"),
+    smallButtonSpeed = createStyle(0, 0, grey, white, 13, "modernx-osc-icon"),
+    volButton = createStyle(0, 0, grey, white, 15, "material-design-iconic-font"),
+    togLoop = createStyle(0, 0, grey, white, 11, "oscc"),
+    togTooltip = createStyle(0, 0, grey, white, 16, "mpv-osd-symbols"),
+	
+    timecodeL = createStyle(0, 0, white, white, 15, user_opts.titlefont),
+    timecodeR = createStyle(0, 0, grey, white, 16, user_opts.titlefont),
+    titlePotMini = createStyle(0, 0, grey, white, 16, user_opts.titlefont),
+    tooltip = createStyle(0, 0, white, black, 13, user_opts.titlefont),
+    vidTitle = createStyle(0, 0, white, white, 14, user_opts.titlefont),
+	
+	wcButtons = createStyle(0, 0, white, white, 15, "modernx-osc-icon"),
+	wcSwitch = createStyle(0, 0, white, white, 17, "mpv-osd-symbols"),
+	wcTitle = createStyle(0, 0, white, white, 14, user_opts.titlefont),
+	wcBar = createStyle(0, 0, black, black, nil, nil),
+	
+    elementDown = "{\\1c&H" .. black .. "&}",
+    elementHover = createStyle(0, 0, osc_palette[user_opts.seekbarColorIndex], black, nil, nil),
 }
 
 local osc_icons = {
-
     close = "\xEE\xA4\x80",
     minimize = "\xEE\xA4\x81",
     restore = "\xEE\xA4\x82",
     maximize = "\xEE\xA4\x83",
     switch = "\238\132\136",
 
-    volume_mute = "\239\142\187",
-    volume = "\239\142\188",
+    play = "\239\142\170",
+    pause = "\239\142\167",
+    skipback = "\xEE\xA4\xA0",
+    skipforward = "\xEE\xA4\xA1",
+    chapter_prev = "\239\142\160",
+    chapter_next = "\239\142\159",
+    playlist_prev = "\239\142\181",
+    playlist_next = "\239\142\180",
 
     audio = "\xEE\xA4\x89",
     subtitle = "\xEE\xA4\x90",
@@ -810,14 +811,8 @@ local osc_icons = {
     fullscreen = "\xEE\xA4\x93",
     fullscreen_exit = "\xEE\xA4\x92",
 
-    play = "\239\142\170",
-    pause = "\239\142\167",
-    skipback = "\xEE\xA4\xA0",
-    skipforward = "\xEE\xA4\xA1",
-    chapter_prev = "\239\142\160",
-    chapter_next = "\239\142\159",
-    playlist_prev = "\239\142\181",
-    playlist_next = "\239\142\180",
+    volume_mute = "\239\142\187",
+    volume = "\239\142\188",
 }
 
 -- internal states, do not touch
@@ -863,14 +858,14 @@ local thumbfast = {
 
 local tick_delay = 1 / 60
 
---- Automatically disable OSC
+-- Automatically disable OSC
 local builtin_osc_enabled = mp.get_property_native("osc")
 if builtin_osc_enabled then
     mp.set_property_native("osc", false)
 end
 
 --
--- Helperfunctions
+-- Helper functions
 --
 
 function kill_animation()
@@ -923,8 +918,20 @@ function scale_value(x0, x1, y0, y1, val)
     return (m * val) + b
 end
 
--- returns hitbox spanning coordinates (top left, bottom right corner)
--- according to alignment
+-- returns hitbox spanning coordinates (top left, bottom right corner) according to alignment
+
+-- 1 > from left, up
+-- 2 > from center, up
+-- 3 > from right, up
+
+-- 4 > from left, center
+-- 5 > from center, center
+-- 6 > from right, center
+
+-- 7 > from left, down
+-- 8 > from center, down
+-- 9 > from right, down
+
 function get_hitbox_coords(x, y, an, w, h)
 
     local alignments = {
@@ -1497,52 +1504,6 @@ function render_elements(master_ass)
 
             local buttontext
 
-			-- toggles activated / greyed out
-			if element.name == "tog_info" then
-				if user_opts.showInfos then
-					element.layout.alpha[1] = 0
-				else
-					element.layout.alpha[1] = user_opts.alphaUntoggledButton
-				end
-			end
-			if element.name == "tog_loop" then
-				if mp.get_property("loop-file")=="inf" then
-					element.layout.alpha[1] = 0
-				else
-					element.layout.alpha[1] = user_opts.alphaUntoggledButton
-				end
-			end
-			if element.name == "tog_ontop" then
-				if user_opts.onTopWhilePlaying then
-					element.layout.alpha[1] = 0
-				elseif (mp.get_property("ontop") == "yes") then
-					element.layout.alpha[1] = 0
-				else
-					element.layout.alpha[1] = user_opts.alphaUntoggledButton
-				end
-			end
-			if element.name == "tog_thumb" then
-				if user_opts.showThumbfast then
-					element.layout.alpha[1] = 0
-				else
-					element.layout.alpha[1] = user_opts.alphaUntoggledButton
-				end
-			end
-			if element.name == "tog_oscmode" then
-				if user_opts.oscMode == "always" then
-					element.layout.alpha[1] = 0
-				else
-					element.layout.alpha[1] = user_opts.alphaUntoggledButton
-				end
-			end
-			if element.name == "tog_tooltip" then
-				if user_opts.showTooltip then
-					element.layout.alpha[1] = 0
-				else
-					element.layout.alpha[1] = user_opts.alphaUntoggledButton
-				end
-			end
-
             if type(element.content) == "function" then
                 buttontext = element.content() -- function objects
             elseif not (element.content == nil) then
@@ -2043,6 +2004,7 @@ function layout()
 	xMinimalIcons = (osc_geo.w - seekbarMarginX)/2
 
     -- Controller Background
+
     new_element("transBg", "box")
     lo = add_layout("transBg")
     lo.geometry = {x = posX, y = posY, an = 7, w = osc_geo.w, h = 10}
@@ -2120,7 +2082,6 @@ function layout()
 	else
 		lo.geometry = {x = 60, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
 	end
-
 	lo.style = osc_styles.smallButtons
 
 	-- Subtitle tracks
@@ -2142,8 +2103,6 @@ function layout()
 		lo.style = string.format("%s{\\clip(%f,%f,%f,%f)}", osc_styles.vidTitle,
 								 geo.x, geo.y - geo.h, geo.x + geo.w, geo.y)
 		lo.alpha[3] = 0
-
-		-- Navigation
 
 		-- Playback control buttons
 
@@ -2201,7 +2160,7 @@ function layout()
 		if user_opts.showIcons then
 			lo = add_layout("tog_loop")
 			lo.geometry = {x = osc_geo.w - 160, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
-			lo.style = osc_styles.ctrlLoop
+			lo.style = osc_styles.togLoop
 		end
 
 		-- Toggle thumbfast
@@ -2221,7 +2180,7 @@ function layout()
 		-- Toggle on top
 		lo = add_layout("tog_ontop")
 		lo.geometry = {x = osc_geo.w - 85, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
-		lo.style = osc_styles.ctrlLoop
+		lo.style = osc_styles.togLoop
 
 		-- Toggle info
 		lo = add_layout("tog_info")
@@ -2298,6 +2257,7 @@ function layoutPot()
 	end
 
     -- Controller Background
+
     new_element("transBg", "box")
     lo = add_layout("transBg")	
     lo.geometry = {x = posX, y = posY, an = 7, w = osc_geo.w, h = 10}
@@ -2400,7 +2360,6 @@ function layoutPot()
 	
 	-- Audio / Subs
 
-	-- Audio tracks
 	lo = add_layout("cy_audio")
 	if minimalUI then
 		lo.geometry = {x = osc_geo.w - (2 * gapNavButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
@@ -2409,7 +2368,6 @@ function layoutPot()
 	end
 	lo.style = osc_styles.smallButtons
 
-	-- Subtitle tracks
 	lo = add_layout("cy_sub")
 	if minimalUI then
 		lo.geometry = {x = osc_geo.w - gapNavButton, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
@@ -2447,7 +2405,7 @@ function layoutPot()
 			-- Toggle loop
 			lo = add_layout("tog_loop")
 			lo.geometry = {x = osc_geo.w - (9 * gapSmallButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
-			lo.style = osc_styles.ctrlLoop
+			lo.style = osc_styles.togLoop
 
 			-- Toggle thumbfast
 			lo = add_layout("tog_thumb")
@@ -2462,7 +2420,7 @@ function layoutPot()
 			-- Toggle Ontop
 			lo = add_layout("tog_ontop")
 			lo.geometry = {x = osc_geo.w - (6 * gapSmallButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
-			lo.style = osc_styles.ctrlLoop
+			lo.style = osc_styles.togLoop
 
 			-- Volume
 			lo = add_layout("volume")
@@ -2551,7 +2509,7 @@ function osc_init()
     local pl_count = mp.get_property_number("playlist-count", 0)
     local have_pl = (pl_count > 1)
     local pl_pos = mp.get_property_number("playlist-pos", 0) + 1
-    local have_ch = (mp.get_property_number("chapter&éas", 0) > 0)
+    local have_ch = (mp.get_property_number("chapters", 0) > 0)
     local loop = mp.get_property("loop-playlist", "no")
 
     local ne
@@ -2630,33 +2588,30 @@ function osc_init()
     ne.eventresponder["mbtn_left_down"] = --exact seeks on single clicks
         function (element) mp.commandv("seek", get_slider_value(element),
             "absolute-percent+exact") end
-	-- right clic : switch chapter mode on / off
-	ne.eventresponder["mbtn_right_up"] = function ()
+	ne.eventresponder["mbtn_right_up"] = function () -- right clic : switch chapter mode on / off
 		if not minimalUI then
 			user_opts.showChapters = not user_opts.showChapters
 			request_init()
 		end
 	end
-	-- mouse wheel : bar height
-    ne.eventresponder["wheel_up_press"] =
-        function () 
-			if user_opts.seekbarHeight <= 9 then
-				user_opts.seekbarHeight = user_opts.seekbarHeight + 1
-				request_init()
-			end
-
+    ne.eventresponder["wheel_up_press"] = function () -- mouse wheel : bar height
+		if user_opts.seekbarHeight <= 9 then
+			user_opts.seekbarHeight = user_opts.seekbarHeight + 1
+			request_init()
 		end
-    ne.eventresponder["wheel_down_press"] =
-        function () 
-			if user_opts.seekbarHeight > 0 then
-				user_opts.seekbarHeight = user_opts.seekbarHeight - 1
-				request_init()
-			end
+	end
+    ne.eventresponder["wheel_down_press"] = function () -- mouse wheel : bar height
+		if user_opts.seekbarHeight > 0 then
+			user_opts.seekbarHeight = user_opts.seekbarHeight - 1
+			request_init()
 		end
-    ne.eventresponder["reset"] =
-        function (element) element.state.lastseek = nil end
+	end
+    ne.eventresponder["reset"] = function 
+		(element) element.state.lastseek = nil 
+	end
 
     -- title
+
     ne = new_element("title", "button")
 	ne.visible = user_opts.showTitle
     ne.hoverable = false
@@ -2667,6 +2622,7 @@ function osc_init()
     end
 
     -- tc_left (current pos)
+
     ne = new_element("tc_left", "button")
     ne.hoverable = false
     ne.content = function ()
@@ -2684,28 +2640,28 @@ function osc_init()
 	end
 	if minimalUI and user_opts.modernTog then
 		ne.hoverable = true
-		ne.eventresponder["mbtn_left_up"] =
-			function () mp.commandv("cycle", "pause") end
+		ne.eventresponder["mbtn_left_up"] = function () 
+			mp.commandv("cycle", "pause") 
+		end
 	elseif not minimalUI then
-		ne.eventresponder["mbtn_left_up"] =
-			function ()
-				user_opts.showTitle = not user_opts.showTitle 
-				request_init()
-			end
-	end
-	ne.eventresponder["mbtn_right_up"] =
-		function () 
-			user_opts.windowcontrols_title = not user_opts.windowcontrols_title 
+		ne.eventresponder["mbtn_left_up"] = function ()
+			user_opts.showTitle = not user_opts.showTitle 
 			request_init()
 		end
-    ne.eventresponder["wheel_down_press"] =
-        function () 
-			mp.commandv("seek", -user_opts.jumpValue)
-		end
-    ne.eventresponder["wheel_up_press"] =
-        function () mp.commandv("seek", user_opts.jumpValue) end
+	end
+	ne.eventresponder["mbtn_right_up"] =function () 
+		user_opts.windowcontrols_title = not user_opts.windowcontrols_title 
+		request_init()
+	end
+    ne.eventresponder["wheel_down_press"] = function () 
+		mp.commandv("seek", -user_opts.jumpValue)
+	end
+    ne.eventresponder["wheel_up_press"] = function () 
+		mp.commandv("seek", user_opts.jumpValue) 
+	end
 		
 	-- separator /
+
     ne = new_element("tc_separator", "button")
     ne.hoverable = false
 	ne.styledown = false
@@ -2713,6 +2669,7 @@ function osc_init()
 	ne.content = function () return "/" end
 
     -- tc_right (total/remaining time)
+
     ne = new_element("tc_right", "button")
     ne.hoverable = false
 	ne.styledown = false
@@ -2729,14 +2686,11 @@ function osc_init()
     ne.eventresponder["mbtn_left_up"] = function () 
 		user_opts.timetotal = not user_opts.timetotal
 	end
-	-- right clic : switch UI minimal / default
-    ne.eventresponder["mbtn_right_up"] = function () 
-			user_opts.minimalUI = not user_opts.minimalUI
-			request_init()
+    ne.eventresponder["mbtn_right_up"] = function () -- right clic : switch UI minimal / default
+		user_opts.minimalUI = not user_opts.minimalUI
 		request_init()
 	end
-	-- wheel : move bar up / down in minimal UI mode
-	ne.eventresponder["wheel_up_press"] = function ()
+		ne.eventresponder["wheel_up_press"] = function () -- wheel : move bar up / down in minimal UI mode
 		if minimalUI and user_opts.modernTog then
 			if user_opts.minimalSeekY > 0 then
 				user_opts.minimalSeekY = user_opts.minimalSeekY - 1
@@ -2744,7 +2698,7 @@ function osc_init()
 			request_init()
 		end
 	end
-	ne.eventresponder["wheel_down_press"] = function ()
+	ne.eventresponder["wheel_down_press"] = function () -- wheel : move bar up / down in minimal UI mode
 		if minimalUI and user_opts.modernTog then
 			if user_opts.minimalSeekY < 50 then
 				user_opts.minimalSeekY = user_opts.minimalSeekY + 1
@@ -2758,6 +2712,7 @@ function osc_init()
     --
 
     -- prev
+
     ne = new_element("pl_prev", "button")
     ne.content = osc_icons.playlist_prev
     ne.enabled = (pl_pos > 1) or (loop ~= "no")
@@ -2768,23 +2723,21 @@ function osc_init()
 			return file.label
 		end
 	end
-    ne.eventresponder["mbtn_left_up"] =
-        function ()
-            mp.commandv("playlist-prev", "weak")
-            if user_opts.playlist_osd then
-                show_message(get_playlist(), 3)
-            end
-        end
-    ne.eventresponder["shift+mbtn_left_up"] =
-        function () 
-			show_message(get_playlist(), 10) 
-		end
-    ne.eventresponder["mbtn_right_up"] =
-        function () 
+    ne.eventresponder["mbtn_left_up"] = function ()
+		mp.commandv("playlist-prev", "weak")
+		if user_opts.playlist_osd then
 			show_message(get_playlist(), 3)
 		end
+	end
+    ne.eventresponder["shift+mbtn_left_up"] = function () 
+		show_message(get_playlist(), 10) 
+	end
+    ne.eventresponder["mbtn_right_up"] = function () 
+		show_message(get_playlist(), 3)
+	end
 
     -- next
+
     ne = new_element("pl_next", "button")
     ne.content = osc_icons.playlist_next
     ne.enabled = (have_pl and (pl_pos < pl_count)) or (loop ~= "no")
@@ -2795,27 +2748,25 @@ function osc_init()
 			return file.label
 		end
 	end
-    ne.eventresponder["mbtn_left_up"] =
-        function ()
-            mp.commandv("playlist-next", "weak")
-            if user_opts.playlist_osd then
-                show_message(get_playlist(), 3)
-            end
-        end
-    ne.eventresponder["shift+mbtn_left_up"] =
-        function () 
-			show_message(get_playlist(), 10) 
+    ne.eventresponder["mbtn_left_up"] = function ()
+		mp.commandv("playlist-next", "weak")
+		if user_opts.playlist_osd then
+			show_message(get_playlist(), 3)
 		end
-    ne.eventresponder["mbtn_right_up"] =
-        function () 
-			show_message(get_playlist(), 3) 
-		end
+	end
+    ne.eventresponder["shift+mbtn_left_up"] = function () 
+		show_message(get_playlist(), 10) 
+	end
+    ne.eventresponder["mbtn_right_up"] = function () 
+		show_message(get_playlist(), 3) 
+	end
 
     --
     -- big buttons
     --
 
     -- playpause
+
     ne = new_element("playpause", "button")
     ne.content = function ()
         if mp.get_property("pause") == "yes" then
@@ -2824,10 +2775,10 @@ function osc_init()
             return (osc_icons.pause)
         end
     end
-    ne.eventresponder["mbtn_left_up"] =
-        function () mp.commandv("cycle", "pause") end
-	-- Right clic : cycle through colors
-    ne.eventresponder["mbtn_right_up"] = function ()
+    ne.eventresponder["mbtn_left_up"] = function () 
+		mp.commandv("cycle", "pause") 
+	end
+    ne.eventresponder["mbtn_right_up"] = function () -- Right clic : cycle through colors
 		if user_opts.seekbarColorIndex == #osc_palette then
 			user_opts.seekbarColorIndex = 1
 		else
@@ -2837,6 +2788,7 @@ function osc_init()
 	end
 
     -- skipback
+
     ne = new_element("skipback", "button")
     ne.softrepeat = true
 	if user_opts.showTooltip then
@@ -2846,14 +2798,18 @@ function osc_init()
 		end
 	end
     ne.content = osc_icons.skipback
-    ne.eventresponder["mbtn_left_down"] =
-        function () mp.commandv("seek", -user_opts.jumpValue) end
-    ne.eventresponder["shift+mbtn_left_down"] =
-        function () mp.commandv("frame-back-step") end
-    ne.eventresponder["mbtn_right_down"] =
-        function () mp.commandv("seek", -60) end
+    ne.eventresponder["mbtn_left_down"] = function () 
+		mp.commandv("seek", -user_opts.jumpValue) 
+	end
+    ne.eventresponder["shift+mbtn_left_down"] = function () 
+		mp.commandv("frame-back-step") 
+	end
+    ne.eventresponder["mbtn_right_down"] = function () 
+		mp.commandv("seek", -60) 
+	end
 
     -- skipfrwd
+
     ne = new_element("skipfrwd", "button")
     ne.softrepeat = true
 	if user_opts.showTooltip then
@@ -2863,14 +2819,18 @@ function osc_init()
 		end
 	end
     ne.content = osc_icons.skipforward
-    ne.eventresponder["mbtn_left_down"] =
-        function () mp.commandv("seek", user_opts.jumpValue) end
-    ne.eventresponder["shift+mbtn_left_down"] =
-        function () mp.commandv("frame-step") end
-    ne.eventresponder["mbtn_right_down"] =
-        function () mp.commandv("seek", 60) end
+    ne.eventresponder["mbtn_left_down"] = function () 
+		mp.commandv("seek", user_opts.jumpValue) 
+	end
+    ne.eventresponder["shift+mbtn_left_down"] = function () 
+		mp.commandv("frame-step") 
+	end
+    ne.eventresponder["mbtn_right_down"] = function () 
+		mp.commandv("seek", 60) 
+	end
 
     -- ch_prev
+
     ne = new_element("ch_prev", "button")
     ne.enabled = have_ch
     ne.content = osc_icons.chapter_prev
@@ -2881,19 +2841,21 @@ function osc_init()
 			return file.label
 		end
 	end
-    ne.eventresponder["mbtn_left_up"] =
-        function ()
-            mp.commandv("add", "chapter", -1)
-            if user_opts.chapters_osd then
-                show_message(get_chapterlist(), 3)
-            end
-        end
-    ne.eventresponder["shift+mbtn_left_up"] =
-        function () show_message(get_chapterlist(), 3) end
-    ne.eventresponder["mbtn_right_up"] =
-        function () show_message(get_chapterlist(), 3) end
+    ne.eventresponder["mbtn_left_up"] = function ()
+		mp.commandv("add", "chapter", -1)
+		if user_opts.chapters_osd then
+			show_message(get_chapterlist(), 3)
+		end
+	end
+    ne.eventresponder["shift+mbtn_left_up"] = function () 
+		show_message(get_chapterlist(), 3) 
+	end
+    ne.eventresponder["mbtn_right_up"] = function () 
+		show_message(get_chapterlist(), 3) 
+	end
 
     -- ch_next
+
     ne = new_element("ch_next", "button")
     ne.enabled = have_ch
     ne.content = osc_icons.chapter_next
@@ -2904,21 +2866,23 @@ function osc_init()
 			return file.label
 		end
 	end
-    ne.eventresponder["mbtn_left_up"] =
-        function ()
-            mp.commandv("add", "chapter", 1)
-            if user_opts.chapters_osd then
-                show_message(get_chapterlist(), 3)
-            end
-        end
-    ne.eventresponder["shift+mbtn_left_up"] =
-        function () show_message(get_chapterlist(), 3) end
-    ne.eventresponder["mbtn_right_up"] =
-        function () show_message(get_chapterlist(), 3) end
+    ne.eventresponder["mbtn_left_up"] = function ()
+		mp.commandv("add", "chapter", 1)
+		if user_opts.chapters_osd then
+			show_message(get_chapterlist(), 3)
+		end
+	end
+    ne.eventresponder["shift+mbtn_left_up"] = function () 
+		show_message(get_chapterlist(), 3) 
+	end
+    ne.eventresponder["mbtn_right_up"] = function () 
+		show_message(get_chapterlist(), 3) 
+	end
 
     update_tracklist()
 
     -- cy_audio
+
     ne = new_element("cy_audio", "button")
     ne.visible = (osc_param.playresx >= user_opts.visibleButtonsW)
     ne.enabled = (#tracks_osc.audio > 0)
@@ -2934,10 +2898,12 @@ function osc_init()
 		set_track("audio", 1)
 		get_track_name("audio")
 	end
-    ne.eventresponder["mbtn_right_up"] =
-        function () show_message(get_tracklist("audio"), 2) end
+    ne.eventresponder["mbtn_right_up"] = function () 
+		show_message(get_tracklist("audio"), 2) 
+	end
 
     -- cy_sub
+
     ne = new_element("cy_sub", "button")
     ne.visible = (osc_param.playresx >= user_opts.visibleButtonsW)
     ne.enabled = (#tracks_osc.sub > 0)
@@ -2953,23 +2919,25 @@ function osc_init()
 		set_track("sub", 1) 
 		get_track_name("sub")
 	end
-    ne.eventresponder["mbtn_right_up"] =
-        function () show_message(get_tracklist("sub"), 2) end
-	-- mouse wheel : subtitles position up / down
-	ne.eventresponder["wheel_up_press"] = function () 
+    ne.eventresponder["mbtn_right_up"] = function () 
+		show_message(get_tracklist("sub"), 2)
+	end
+	ne.eventresponder["wheel_up_press"] = function () -- mouse wheel : subtitles position up / down
 		local subPos = mp.get_property("sub-pos")
 		subPos = subPos - 1
 		mp.set_property("sub-pos", subPos)
 	end
-	ne.eventresponder["wheel_down_press"] = function () 
+	ne.eventresponder["wheel_down_press"] = function () -- mouse wheel : subtitles position up / down
 		local subPos = mp.get_property("sub-pos")
 		subPos = subPos + 1
 		mp.set_property("sub-pos", subPos)
 	end
 
     -- tog_tooltip
+
     ne = new_element("tog_tooltip", "button")
     ne.content = osc_icons.tooltip
+	ne.off = not user_opts.showTooltip
     ne.visible = (osc_param.playresx >= user_opts.visibleButtonsW)
 	if user_opts.showTooltip then
 		ne.tooltip_style = osc_styles.tooltip
@@ -2981,8 +2949,10 @@ function osc_init()
 	end
 
     -- tog_oscmode
+
     ne = new_element("tog_oscmode", "button")
     ne.content = osc_icons.oscmode
+	ne.off = not (user_opts.oscMode == "always")
     ne.visible = (osc_param.playresx >= user_opts.visibleButtonsW)
 	if user_opts.showTooltip then
 		ne.tooltip_style = osc_styles.tooltip
@@ -2996,8 +2966,7 @@ function osc_init()
 			return msg
 		end
 	end
-	-- left clic : switch between show OSC > default / on pause / always 
-    ne.eventresponder["mbtn_left_up"] = function ()
+    ne.eventresponder["mbtn_left_up"] = function () -- left click : show OSC > default / on pause / always 
 	
 		if user_opts.oscMode == "default" then
 			user_opts.oscMode = "onpause"
@@ -3016,8 +2985,7 @@ function osc_init()
 
 		request_init()
 	end
-	-- right clic : switch OSC show on mouse move
-    ne.eventresponder["mbtn_right_up"] = function ()
+    ne.eventresponder["mbtn_right_up"] = function () -- right clics : OSC show on mouse move on / off
 		if user_opts.minmousemove < 0 then
 			user_opts.minmousemove = 0
 			mp.osd_message("OSC show on mouse move : On")
@@ -3027,8 +2995,7 @@ function osc_init()
 		end
 		request_init()
 	end
-	-- wheel up / down : increase / decrease hide time duration (capped between 0 and 5000)
-	ne.eventresponder["wheel_up_press"] = function ()
+	ne.eventresponder["wheel_up_press"] = function () -- wheel : increase / decrease hide time duration
 		if user_opts.minmousemove < 0 then
 			if user_opts.hidetimeout < 5000 then
 				user_opts.hidetimeout = user_opts.hidetimeout + 100
@@ -3042,7 +3009,7 @@ function osc_init()
 		end
 		save_file()
 	end
-	ne.eventresponder["wheel_down_press"] = function ()
+	ne.eventresponder["wheel_down_press"] = function () -- wheel : increase / decrease hide time duration
 		if user_opts.minmousemove < 0 then
 			if user_opts.hidetimeout > 0 then
 				user_opts.hidetimeout = max(0, user_opts.hidetimeout - 100)
@@ -3056,8 +3023,7 @@ function osc_init()
 		end
 		save_file()
 	end
-	-- shift + wheel up / down : increase / decrease fade time duration (capped between 0 and 5000)
-	ne.eventresponder["shift+wheel_up_press"] = function ()
+	ne.eventresponder["shift+wheel_up_press"] = function () -- shift + wheel : increase / decrease fade time duration
 		if user_opts.minmousemove < 0 then
 			if user_opts.fadeduration < 5000 then
 				user_opts.fadeduration = user_opts.fadeduration + 100
@@ -3071,7 +3037,7 @@ function osc_init()
 		end
 		save_file()
 	end
-	ne.eventresponder["shift+wheel_down_press"] = function ()
+	ne.eventresponder["shift+wheel_down_press"] = function () -- shift + wheel : increase / decrease fade time duration
 		if user_opts.minmousemove < 0 then
 			if user_opts.fadeduration > 0 then
 				user_opts.fadeduration = max(0, user_opts.fadeduration - 100)
@@ -3087,8 +3053,10 @@ function osc_init()
 	end
 
     -- tog_thumb
+
     ne = new_element("tog_thumb", "button")
     ne.content = osc_icons.thumb
+	ne.off = not user_opts.showThumbfast
     ne.visible = (osc_param.playresx >= user_opts.visibleButtonsW)
 	ne.enabled = thumbfast.available
 	if user_opts.showTooltip then
@@ -3107,8 +3075,10 @@ function osc_init()
 	end
 
     -- tog_ontop
+
     ne = new_element("tog_ontop", "button")
     ne.content = osc_icons.ontop
+	ne.off = (mp.get_property("ontop") == "no") and not user_opts.onTopWhilePlaying
     ne.visible = (osc_param.playresx >= user_opts.visibleButtonsW)
 	if user_opts.showTooltip then
 		ne.tooltip_style = osc_styles.tooltip
@@ -3124,7 +3094,7 @@ function osc_init()
 			return msg
 		end
 	end
-	ne.eventresponder["mbtn_left_down"] = function ()
+	ne.eventresponder["mbtn_left_up"] = function ()
 		user_opts.onTopWhilePlaying = false
 		if mp.get_property("ontop") == "no" then
 			was_ontop = false
@@ -3133,8 +3103,9 @@ function osc_init()
 			was_ontop = true
 			mp.set_property("ontop", "no")
 		end
+		request_init()
 	end
-	ne.eventresponder["mbtn_right_down"] = function ()
+	ne.eventresponder["mbtn_right_up"] = function ()
 		mp.set_property("pause", "no")
 		user_opts.onTopWhilePlaying = true
 		if mp.get_property("pause") == "no" then
@@ -3142,11 +3113,14 @@ function osc_init()
 		else
 			mp.set_property("ontop", "no")
 		end
+		request_init()
     end
   
     -- tog_loop
+
     ne = new_element("tog_loop", "button")
     ne.content = osc_icons.loop
+	ne.off = mp.get_property("loop-file")=="no"
     ne.visible = (osc_param.playresx >= user_opts.visibleButtonsW)
 	if user_opts.showTooltip then
 		ne.tooltip_style = osc_styles.tooltip
@@ -3158,7 +3132,7 @@ function osc_init()
 			return msg
 		end
 	end
-    ne.eventresponder["mbtn_left_down"] = function ()
+    ne.eventresponder["mbtn_left_up"] = function ()
 		if mp.get_property("loop-file")=="inf" then
 			mp.set_property("loop-file", "no")
 		else
@@ -3168,8 +3142,10 @@ function osc_init()
     end
 
     -- tog_info
+
     ne = new_element("tog_info", "button")
     ne.content = osc_icons.info
+	ne.off = not user_opts.showInfos
     ne.visible = (osc_param.playresx >= user_opts.visibleButtonsW)
 	if user_opts.showTooltip then
 		ne.tooltip_style = osc_styles.tooltip
@@ -3185,6 +3161,7 @@ function osc_init()
 			mp.commandv("script-binding", "stats/display-stats-toggle")
 			user_opts.showInfos = true
         end
+		request_init()
 	end
 	ne.eventresponder["mbtn_right_up"] = function ()
 		user_opts.showIcons = not user_opts.showIcons
@@ -3192,6 +3169,7 @@ function osc_init()
 	end
 
     -- tog_fs
+
     ne = new_element("tog_fs", "button")
     ne.content = function ()
         if state.fullscreen then
@@ -3200,10 +3178,81 @@ function osc_init()
             return osc_icons.fullscreen
         end
     end
-    ne.eventresponder["mbtn_left_up"] =
-        function () mp.commandv("cycle", "fullscreen") end
+    ne.eventresponder["mbtn_left_up"] = function () 
+		mp.commandv("cycle", "fullscreen") 
+	end
+
+    -- volume
+
+    ne = new_element("volume", "button")
+	if user_opts.showTooltip then
+		ne.tooltip_style = osc_styles.tooltip
+		ne.tooltipF = function ()
+			local msg = ""
+			if mp.get_property_native("mute") then
+				return "Mute : On"
+			end
+			return msg
+		end
+	end
+    ne.content = function()
+        local volume = mp.get_property_number("volume", 0)
+        local mute = mp.get_property_native("mute")
+        if volume == 0 or mute then
+            return osc_icons.volume_mute
+        else
+            return osc_icons.volume
+        end
+    end
+    ne.eventresponder["mbtn_left_up"] = function () 
+		mp.commandv("cycle", "mute")
+	end
+    ne.eventresponder["wheel_up_press"] = function ()
+		mp.commandv("osd-auto", "add", "volume", 5) 
+	end
+    ne.eventresponder["wheel_down_press"] = function () 
+		mp.commandv("osd-auto", "add", "volume", -5) 
+	end
+
+    -- playback speed
+
+    ne = new_element("playback_speed", "button")
+	if user_opts.showTooltip then
+		ne.tooltip_style = osc_styles.tooltip
+		ne.tooltipF = function ()
+			return "Speed"
+		end
+	end
+    ne.content = function()
+        local speed = mp.get_property_number("speed", 1.0)
+        return string.format("%.2fx", speed)
+    end
+    ne.visible = (osc_param.playresx >= user_opts.visibleButtonsW)
+    ne.eventresponder["mbtn_left_up"] = function ()
+        local speeds = {1.0, 1.25, 1.5, 1.75, 2.0}  -- List of playback speeds
+        local current_speed = mp.get_property_number("speed", 1.0)
+        local next_speed = speeds[1]  -- Default to the first speed in case current speed isn't found
+        
+        for i = 1, #speeds do
+            if current_speed == speeds[i] then
+                next_speed = speeds[(i % #speeds) + 1]
+                break
+            end
+        end
+        mp.set_property("speed", next_speed)
+    end
+    ne.eventresponder["mbtn_right_up"] = function ()
+        mp.set_property("speed", 1.0)
+    end
+	ne.eventresponder["wheel_up_press"] = function () 
+		mp.commandv("add", "speed", 0.25) 
+	end
+	ne.eventresponder["wheel_down_press"] = function () 
+		mp.commandv("add", "speed", -0.25) 
+	end
 
     -- -- cache
+
 	-- if user_opts.showCache then
 		-- ne = new_element("cache", "button")
 		-- ne.visible = (osc_param.playresx >= user_opts.visibleButtonsW)
@@ -3230,70 +3279,6 @@ function osc_init()
 		-- end
 	-- end
 
-    -- volume
-    ne = new_element("volume", "button")
-	if user_opts.showTooltip then
-		ne.tooltip_style = osc_styles.tooltip
-		ne.tooltipF = function ()
-			local msg = ""
-			if mp.get_property_native("mute") then
-				return "Mute : On"
-			end
-			return msg
-		end
-	end
-    ne.content = function()
-        local volume = mp.get_property_number("volume", 0)
-        local mute = mp.get_property_native("mute")
-        if volume == 0 or mute then
-            return osc_icons.volume_mute
-        else
-            return osc_icons.volume
-        end
-    end
-    ne.eventresponder["mbtn_left_up"] =
-        function () mp.commandv("cycle", "mute") end
-    ne.eventresponder["wheel_up_press"] =
-        function () mp.commandv("osd-auto", "add", "volume", 5) end
-    ne.eventresponder["wheel_down_press"] =
-        function () mp.commandv("osd-auto", "add", "volume", -5) end
-
-    -- playback speed
-    ne = new_element("playback_speed", "button")
-	if user_opts.showTooltip then
-		ne.tooltip_style = osc_styles.tooltip
-		ne.tooltipF = function ()
-			return "Speed"
-		end
-	end
-    ne.content = function()
-        local speed = mp.get_property_number("speed", 1.0)
-        return string.format("%.2fx", speed)
-    end
-    ne.visible = (osc_param.playresx >= user_opts.visibleButtonsW)
-    ne.eventresponder["mbtn_left_up"] =
-    function ()
-        local speeds = {1.0, 1.25, 1.5, 1.75, 2.0}  -- List of playback speeds
-        local current_speed = mp.get_property_number("speed", 1.0)
-        local next_speed = speeds[1]  -- Default to the first speed in case current speed isn't found
-        
-        for i = 1, #speeds do
-            if current_speed == speeds[i] then
-                next_speed = speeds[(i % #speeds) + 1]
-                break
-            end
-        end
-        mp.set_property("speed", next_speed)
-    end
-    ne.eventresponder["mbtn_right_up"] =
-    function ()
-        mp.set_property("speed", 1.0)
-    end
-	ne.eventresponder["wheel_up_press"] =
-		function () mp.commandv("add", "speed", 0.25) end
-	ne.eventresponder["wheel_down_press"] =
-		function () mp.commandv("add", "speed", -0.25) end
-
 	-- save params external file
 	save_file()
 
@@ -3318,6 +3303,7 @@ end
 --
 
 function show_osc()
+
     -- show when disabled can happen (e.g. mouse_move) due to async/delayed unbinding
     if not state.enabled then return end
 
