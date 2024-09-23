@@ -36,8 +36,6 @@ In _mpv.conf_ :
 ```
 #remove borders to have access to the top right icons, switching UI using the maximize window one
 border=no
-#for onTopWhilePlaying = true working at launch
-ontop=yes
 ```
 
 Compatible with [thumbfast](https://github.com/po5/thumbfast)
@@ -146,6 +144,8 @@ fadedurationMouseMove=500
 volume=100
 windowcontrols_title=false
 timetotal=true
+ontop=no
+onTopWhilePlaying=true
 ```
 
 
