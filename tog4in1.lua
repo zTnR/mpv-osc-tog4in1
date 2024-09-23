@@ -545,7 +545,9 @@ local function save_file()
         "fadedurationMouseMove=" .. utils.to_string(user_opts.fadedurationMouseMove) .. "\n"..
         "volume=" .. mp.get_property_native("volume") .. "\n"..
         "windowcontrols_title=" .. utils.to_string(user_opts.windowcontrols_title) .. "\n" ..
-        "timetotal=" .. utils.to_string(user_opts.timetotal) .. "\n"
+        "timetotal=" .. utils.to_string(user_opts.timetotal) .. "\n" ..
+        "ontop=" .. mp.get_property("ontop")  .. "\n" ..
+        "onTopWhilePlaying=" .. utils.to_string(user_opts.onTopWhilePlaying) .. "\n"
     )
     savefile:close()
 end
@@ -668,6 +670,19 @@ local function load_file()
 				user_opts.timetotal = false
 			end
         end
+
+        local ontop = state_data:match("ontop=(%a+)")
+        if ontop then
+            mp.set_property("ontop",ontop)
+        end
+
+        local onTopWhilePlaying = state_data:match("onTopWhilePlaying=(%a+)")
+        if onTopWhilePlaying then
+            user_opts.onTopWhilePlaying = true
+            if onTopWhilePlaying == "false" then
+                user_opts.onTopWhilePlaying = false
+            end
+        end	
     end
 end
 
@@ -749,15 +764,15 @@ if user_opts.UIAllWhite then
 	user_opts.alphaWinCtrl = 0		-- Window control buttons max opacity (white)
 end
 
--- osc styles - params : blur, bord, color1, color2, font, icon
+-- osc styles - params : blur, bord, color1, color2, font size, icon
 local osc_styles = {
-
     transBg = createStyle(75, 100, black, black, nil, nil),
 	transBgMini = createStyle(75, 75, black, black, nil, nil),
 	transBgPot = createStyle(0, 70, black, black, nil, nil),
 	transBgPotMini = createStyle(0, 30, black, black, nil, nil),
 	seekbarBg = createStyle(0, 0, white, white, nil, nil),
 	seekbarFg = createStyle(0, 0, osc_palette[user_opts.seekbarColorIndex], white, nil, nil),
+    elementHover = createStyle(0, 0, osc_palette[user_opts.seekbarColorIndex], black, nil, nil),
 
     bigButtons = createStyle(0, 0, white, white, 22, "material-design-iconic-font"),
     bigButtonsPot = createStyle(0, 0, white, white, 21, "material-design-iconic-font"),
@@ -781,7 +796,6 @@ local osc_styles = {
 	wcBar = createStyle(0, 0, black, black, nil, nil),
 	
     elementDown = "{\\1c&H" .. black .. "&}",
-    elementHover = createStyle(0, 0, osc_palette[user_opts.seekbarColorIndex], black, nil, nil),
 }
 
 local osc_icons = {
@@ -1818,7 +1832,7 @@ function add_layout(name)
 			nibblebottom = user_opts.showChapters
 		end
 
-		osc_styles.elementHover = "{\\blur0\\1c&H" .. osc_palette[user_opts.seekbarColorIndex] .. "&}"
+		osc_styles.elementHover = createStyle(0, 0, osc_palette[user_opts.seekbarColorIndex], black, nil, nil)
 	
         if (elements[name].type == "button") then
             elements[name].layout.button = {
@@ -2025,7 +2039,7 @@ function layout()
     lo.layer = 13
     lo.alpha[1] = 150
 
-    osc_styles.seekbarFg = "{\\blur1\\bord1\\1c&H" .. osc_palette[user_opts.seekbarColorIndex] .. "&}"
+	osc_styles.seekbarFg = createStyle(0, 0, osc_palette[user_opts.seekbarColorIndex], white, nil, nil)
 
     lo = add_layout("seekbar")
     lo.geometry = {x = refX, y = refY - oscY - 30 + minimalSeekY, an = 5, w = osc_geo.w - seekbarMarginX, h = seekbarHeight}
@@ -2282,7 +2296,7 @@ function layoutPot()
     lo.layer = 13
     lo.alpha[1] = seekbarBgAlpha
 
-    osc_styles.seekbarFg = "{\\blur1\\bord1\\1c&H" .. osc_palette[user_opts.seekbarColorIndex] .. "&}"
+	osc_styles.seekbarFg = createStyle(0, 0, osc_palette[user_opts.seekbarColorIndex], white, nil, nil)
 
     lo = add_layout("seekbar")
 	local hhh = refX - (refX - potRefX + offsetSeekbarLeft)
@@ -2625,6 +2639,7 @@ function osc_init()
 
     ne = new_element("tc_left", "button")
     ne.hoverable = false
+	ne.styledown = minimalUI and user_opts.modernTog
     ne.content = function ()
 		return (mp.get_property_osd("playback-time"))
     end
@@ -3106,7 +3121,6 @@ function osc_init()
 		request_init()
 	end
 	ne.eventresponder["mbtn_right_up"] = function ()
-		mp.set_property("pause", "no")
 		user_opts.onTopWhilePlaying = true
 		if mp.get_property("pause") == "no" then
 			mp.set_property("ontop", "yes")
@@ -3832,7 +3846,6 @@ end)
 -- OnTop while playing
 -- https://github.com/mpv-player/mpv/blob/master/TOOLS/lua/ontop-playback.lua
 
-local was_ontop = false
 mp.observe_property("pause", "bool", function(_, value)
 	if user_opts.onTopWhilePlaying then
 		local ontop = mp.get_property_native("ontop")
@@ -3842,10 +3855,9 @@ mp.observe_property("pause", "bool", function(_, value)
 				was_ontop = true
 			end
 		else
-			if was_ontop and not ontop then
+			if not ontop then
 				mp.set_property_native("ontop", true) 
 			end
-			was_ontop = false  
 		end
 	end
 end)
