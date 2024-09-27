@@ -89,6 +89,7 @@ Maximized window button has been replaced and switches between the 2 main UIs in
 - Toggle tooltips   > Left click      : On / off
 - Toggle thumbfast  > Left click      : On / off
 - Toggle loop       > Left click      : Loop current file on / off
+- Toggle loop       > Right click     : Loop playlist on / off
 
 - Toggle subtitles  > Left clic       : Next subtitle
 - Toggle subtitles  > Right clic      : Display subtitle list osd
