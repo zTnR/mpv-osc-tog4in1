@@ -48,6 +48,7 @@ local user_opts = {
     showonseek = false,                 -- show OSC when seeking
     titlefont = "Bahnschrift",          -- font used for the title above OSC and in the window controls bar
     tick_delay = 1 / 60,                -- minimum interval between OSC redraws in seconds
+    seekrangestyle = "none",            -- display demuxer cache in seekbar
     tick_delay_follow_display_fps = false, -- use display fps as the minimum interval
 
 	-- tog4in1
@@ -3134,7 +3135,7 @@ function osc_init()
 
     ne = new_element("tog_loop", "button")
     ne.content = osc_icons.loop
-	ne.off = mp.get_property("loop-file")=="no"
+	ne.off = mp.get_property("loop-file")=="no" and mp.get_property("loop-playlist")=="no"
     ne.visible = (osc_param.playresx >= user_opts.visibleButtonsW)
 	if user_opts.showTooltip then
 		ne.tooltip_style = osc_styles.tooltip
@@ -3142,6 +3143,8 @@ function osc_init()
 			local msg = "Loop file : Off"
 			if mp.get_property("loop-file")=="inf" then
 				msg = "Loop file : On"
+            elseif mp.get_property("loop-playlist")=="inf" then
+				msg = "Loop playlist : On"
 			end
 			return msg
 		end
@@ -3149,8 +3152,20 @@ function osc_init()
     ne.eventresponder["mbtn_left_up"] = function ()
 		if mp.get_property("loop-file")=="inf" then
 			mp.set_property("loop-file", "no")
+			mp.set_property("loop-playlist", "no")
 		else
 			mp.set_property("loop-file", "inf")
+			mp.set_property("loop-playlist", "no")
+		end
+		request_init()
+    end
+    ne.eventresponder["mbtn_right_up"] = function ()
+		if mp.get_property("loop-playlist")=="inf" then
+			mp.set_property("loop-playlist", "no")
+			mp.set_property("loop-file", "no")
+		else
+			mp.set_property("loop-playlist", "inf")
+			mp.set_property("loop-file", "no")
 		end
 		request_init()
     end
