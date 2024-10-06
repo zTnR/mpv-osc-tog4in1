@@ -32,12 +32,6 @@ In the root ```mpv``` or ```mpvnet``` directory :
 
 Copy the ```font``` folder.
 
-In _mpv.conf_ : 
-```
-#remove borders to have access to the top right icons, switching UI using the maximize window one
-border=no
-```
-
 Compatible with [thumbfast](https://github.com/po5/thumbfast)
 
 # Tog4in1
@@ -51,12 +45,6 @@ Compatible with [thumbfast](https://github.com/po5/thumbfast)
 ![4](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/preview/Preview4.png)
 
 # Buttons / Other
-
-### Top right corner
-
-```
-Maximized window button has been replaced and switches between the 2 main UIs instead.
-```
 
 ### Seekbar
 
@@ -74,6 +62,8 @@ Maximized window button has been replaced and switches between the 2 main UIs in
 
 ```
 - Play button       > Right clic      : Cycle seekbar / hover colors
+
+- Toggle UI         > Left click      : Switch between th 2 OSC
 
 - Toggle on top     > Left click      : On / off
 - Toggle on top     > Right click     : While playing
@@ -115,6 +105,9 @@ jumpValue = 5,               -- Default jump value in s (From OSC only)
 smallIcon = 20,              -- Dimensions in px of small icons
 seekbarColorIndex = 8,       -- Default OSC seekbar color (oscPalette)
 seekbarHeight = 0,           -- seekbar height offset
+seekbarBgHeight = true,      -- seekbar background height follow seekbar height
+bgBarAlpha = 180,            -- seekbar background opacity
+showCache = true,            -- Show cache
 showInfos = false,           -- Toggle Statistics
 showThumbfast = true,        -- Toggle Thumbfast
 showTooltip = true,          -- Toggle Tooltips 
@@ -124,6 +117,8 @@ showIcons = true,            -- show 'advanced buttons'
 onTopWhilePlaying = true,    -- Toggle On top while playing
 oscMode = "default",         -- Toggle OSC Modes default / onpause / always
 heightoscShowHidearea = 120, -- Height show / hide osc area
+heightwcShowHidearea = 30,   -- Height show / hide window controls area
+visibleButtonsW = 300,       -- Max width for bottom OSC side buttons visible
 ```
 
 Content saveparams.ini
