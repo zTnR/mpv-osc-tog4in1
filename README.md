@@ -19,20 +19,24 @@ Giving access to functionalities and OSC customization directly through the OSC 
 - OSC behaviour : show on cursor move on / off
 - Modify subtitles vertical positioning
 - Modify hide / fade timeouts
+- Loop file / playlist
 
 Changes are saved in a **_saveparams.ini_** file in the root directory.
 
 Extra buttons can be hidden by right-clicking on the _show Statistics_ one.
 
+Compatible with [thumbfast](https://github.com/po5/thumbfast)
+
 # Installation
 
-In the root ```mpv``` or ```mpvnet``` directory :
+Config folders :
 
-[tog4in1.lua](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/tog4in1.lua) in the ```script``` folder.
+- Linux : ```~/.config/mpv```
+- Windows : ```C:/Users/Username/AppData/Roaming/mpv``` or ```C:/Users/Username/AppData/Roaming/mpvnet``` 
+
+Copy [tog4in1.lua](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/tog4in1.lua) in a ```script``` folder.
 
 Copy the ```font``` folder.
-
-Compatible with [thumbfast](https://github.com/po5/thumbfast)
 
 # Tog4in1
 
