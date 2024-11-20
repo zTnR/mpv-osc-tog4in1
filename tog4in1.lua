@@ -64,7 +64,7 @@ local user_opts = {
 	seekbarHeight = 0,					-- seekbar height offset
 	seekbarBgHeight = true,				-- seekbar background height follow seekbar height
 	bgBarAlpha = 180,					-- seekbar background opacity
-	showCache = true,					-- Show cache
+	showCache = false,					-- Show cache
 	showInfos = false,					-- Toggle Statistics
 	showThumbfast = true,				-- Toggle Thumbfast
 	showTooltip = true,					-- Toggle Tooltips
@@ -167,9 +167,9 @@ local function reset_all()
 	tn_gen_duration	   		= nil
 end
 
-------------
--- TN OSC --
-------------
+-------------------
+-- Thumbnail OSC --
+-------------------
 
 local message = {
 	osc = {
@@ -778,7 +778,7 @@ local osc_styles = {
 	elementHover		= createStyle(0, 0, osc_palette[user_opts.seekbarColorIndex], black, nil, nil),
 
 	bigButtons			= createStyle(0, 0, white, white, 22, "material-design-iconic-font"),
-	bigButtonsPot		= createStyle(0, 0, white, white, 21, "material-design-iconic-font"),
+	bigButtonsPot		= createStyle(0, 0, white, white, 20, "material-design-iconic-font"),
 	mediumButtons		= createStyle(0, 0, grey, white, 16, "modernx-osc-icon"),
 	mediumButtons2		= createStyle(0, 0, grey, white, 18, "material-design-iconic-font"),
 	smallButtons		= createStyle(0, 0, grey, white, 15, "modernx-osc-icon"),
@@ -2176,7 +2176,7 @@ function layout()
 		if user_opts.showIcons then
 			if user_opts.showCache then
 				lo = add_layout("cache")
-				lo.geometry = {x = 180, y = refY - oscY - 1.5, an = 5, w = 30, h = smallIconS}
+				lo.geometry = {x = 185, y = refY - oscY - 1.5, an = 5, w = 30, h = smallIconS}
 				lo.style = osc_styles.smallButtonSpeed
 			end
 		end
@@ -2416,9 +2416,9 @@ function layoutPot()
 		lo.geometry = {x = potRefX + offsetSeekbarLeft, y = refY - oscY, an = 4, w = seekbarWidth, h = smallIconS}
 		lo.style = osc_styles.titlePotMini
 		lo.alpha[3] = 0
-		lo.button.maxchars = 60
+		lo.button.maxchars = 75
 		if ((not user_opts.vidscale and not state.fullscreen) or not state.fullscreen) then
-			lo.button.maxchars = 30
+			lo.button.maxchars = 50
 		end
 
 		if user_opts.showIcons then
@@ -2426,7 +2426,7 @@ function layoutPot()
 			-- Cache
 			if user_opts.showCache then
 				lo = add_layout("cache")
-				lo.geometry = {x = osc_geo.w - (13.5 * gapSmallButton) - 5, y = refY - oscY - 1, an = 5, w = smallIconS, h = smallIconS}
+				lo.geometry = {x = osc_geo.w - (14 * gapSmallButton) - 5, y = refY - oscY - 1, an = 5, w = smallIconS, h = smallIconS}
 				lo.style = osc_styles.smallButtonSpeed
 			end
 
