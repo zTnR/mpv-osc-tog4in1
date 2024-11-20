@@ -95,7 +95,7 @@ Copy the ```font``` folder.
 
 # Specifics
 
-New parameters in _user_opts_
+Parameters in _user_opts_
 
 ```
 -- tog4in1
@@ -125,7 +125,27 @@ heightwcShowHidearea = 30,   -- Height show / hide window controls area
 visibleButtonsW = 300,       -- Max width for bottom OSC side buttons visible
 ```
 
+Colors
+
+Remove / add lines to remove / add colors. (Hexa codes are reversed in mpv)
+
+```
+local osc_palette = {
+  [1]    = "7f7f00", -- cyan
+  [2]	 = "E39C42", -- blue
+  [3]	 = "23a08e", -- green apple
+  [4]	 = "56bb58", -- green
+  [5]	 = "38b3ce", -- yellow past
+  [6]	 = "1190cf", -- orange past
+  [7]	 = "0261ec", -- orange
+  [8]	 = "3333ff", -- red past
+  [9]	 = "cc66ff", -- pink
+  [10]   = "e9e9e9", -- white
+}
+```
+
 Content saveparams.ini
+
 ```
 showThumbfast=true
 showTooltip=true
