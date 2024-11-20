@@ -127,7 +127,7 @@ visibleButtonsW = 300,       -- Max width for bottom OSC side buttons visible
 
 Colors
 
-Remove / add lines to remove / add colors. (Hexa codes are reversed in mpv)
+Hexa codes are "reversed" in mpv. ABCDEF becomes EFCDAB.
 
 ```
 local osc_palette = {
