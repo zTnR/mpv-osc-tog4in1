@@ -34,9 +34,18 @@ Config folders :
 - Linux : ```~/.config/mpv```
 - Windows : ```C:/Users/Username/AppData/Roaming/mpv``` or ```C:/Users/Username/AppData/Roaming/mpvnet``` 
 
-Copy [tog4in1.lua](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/tog4in1.lua) in a ```script``` folder.
+### Tog4in1-Multi (V1)
 
-Copy the ```font``` folder.
+- Compatible Windows and Linux, v1 icons.
+- Copy [tog4in1.lua](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/tog4in1.lua) in a ```script``` folder.
+- Copy the ```font``` folder.
+
+### Tog4in1-Linux (V2)
+
+- Compatible Linux only, v2 icons.
+- Copy [tog4in1.lua](https://github.com/zTnR/mpv-osc-tog4in1/blob/main/tog4in1.lua) in a ```script``` folder.
+- Copy the ```font``` folder.
+- The 2 other fonts **must be installed as system fonts** in : ```~/.local/share/fonts```
 
 # Tog4in1
 
