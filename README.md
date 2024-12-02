@@ -94,12 +94,12 @@ Config folders :
 - Toggle loop       > Left click      : Loop current file on / off
 - Toggle loop       > Right click     : Loop playlist on / off
 
-- Toggle subtitles  > Left clic       : Next subtitle
-- Toggle subtitles  > Right clic      : Display subtitle list osd
+- Toggle subtitles  > Left clic       : Next subtitle + OSD List
+- Toggle subtitles  > Right clic      : Previous subtitle + OSD List
 - Toggle subtitles  > Mouse wheel     : Subtitle position up / down
 
-- Toggle audio      > Left clic       : Next audio track
-- Toggle audio      > Right clic      : display audio track list osd
+- Toggle audio      > Left clic       : Next audio track + OSD List
+- Toggle audio      > Right clic      : Previous audio track + OSD List
 ```
 
 # Specifics
