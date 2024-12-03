@@ -2877,7 +2877,11 @@ function osc_init()
 		ne.tooltip_style = osc_styles.tooltip
 		ne.tooltipF = function ()
 			local file = getDeltaChapter(-1)
-			return file.label
+			if file == nil then
+				return "Chapter 1 not starting at 0. Who does that ?"
+			else
+				return file.label
+			end
 		end
 	end
 	ne.eventresponder["mbtn_left_up"] = function ()
@@ -2902,7 +2906,11 @@ function osc_init()
 		ne.tooltip_style = osc_styles.tooltip
 		ne.tooltipF = function ()
 			local file = getDeltaChapter(1)
-			return file.label
+			if file == nil then
+				return "Chapter 1 not starting at 0. Who does that ?"
+			else
+				return file.label
+			end
 		end
 	end
 	ne.eventresponder["mbtn_left_up"] = function ()
