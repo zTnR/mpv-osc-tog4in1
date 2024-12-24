@@ -25,7 +25,7 @@ local user_opts = {
 	boxalpha = 80,						-- opacity of the background box (thumbnail), 0 (opaque) to 255 (transparent)
 	alphaUntoggledButton = 120,			-- opacity untoggled button, 0 (opaque) to 255 (transparent)
 	alphaWinCtrl = 60,					-- opacity windows controls, 0 (opaque) to 255 (transparent)
-	seekrangealpha = 64,				-- transparency of seekranges
+	seekrangealpha = 180,				-- transparency of seekranges (cache preload)
 	seekbarhandlesize = 0,				-- size ratio of the knob handle
 	seekbarkeyframes = true,			-- use keyframes when dragging the seekbar
 	hidetimeout = 0,					-- duration in ms until the OSC hides (case "don't show on mouse move")
@@ -48,7 +48,7 @@ local user_opts = {
 	showonseek = false,					-- show OSC when seeking
 	oscFont = "Play",					-- font for OSC
 	tick_delay = 1 / 60,				-- minimum interval between OSC redraws in seconds
-	seekrangestyle = "none",			-- display demuxer cache in seekbar
+	seekrangestyle = "stream",			-- display demuxer cache in seekbar (none / stream / always)
 	tick_delay_follow_display_fps = false, -- use display fps as the minimum interval
 
 	-- tog4in1
@@ -63,7 +63,7 @@ local user_opts = {
 	seekbarColorIndex = 4,				-- Default OSC seekbar color (osc_palette)
 	seekbarHeight = 0,					-- seekbar height offset
 	seekbarBgHeight = true,				-- seekbar background height follow seekbar height
-	bgBarAlpha = 180,					-- seekbar background opacity
+	bgBarAlpha = 220,					-- seekbar background opacity
 	showCache = false,					-- Show cache
 	showInfos = false,					-- Toggle Statistics
 	showThumbfast = true,				-- Toggle Thumbfast
@@ -867,6 +867,7 @@ local state = {
 	osd = mp.create_osd_overlay("ass-events"),
 	chapter_list = {},						-- sorted by time
 	lastvisibility = user_opts.visibility,	-- save last visibility on pause if showonpause
+	isStreaming = false						-- current file is a stream
 }
 
 local thumbfast = {
@@ -1488,7 +1489,7 @@ function render_elements(master_ass)
 
 							local thumbPad = 4
 							local thumbMarginX = 18 / r_w
-							local thumbMarginY = 40
+							local thumbMarginY = 15
 							local tooltipBgColor = "000000"
 							local tooltipBgAlpha = 80
 							local thumbX = math.min(osd_w - thumbfast.width - thumbMarginX, math.max(thumbMarginX, tx / r_w - thumbfast.width / 2))
@@ -2180,7 +2181,7 @@ function layout()
 		if user_opts.showIcons then
 			if user_opts.showCache then
 				lo = add_layout("cache")
-				lo.geometry = {x = 185, y = refY - oscY - 1.5, an = 5, w = 30, h = smallIconS}
+				lo.geometry = {x = 190, y = refY - oscY - 0.5, an = 5, w = 30, h = smallIconS}
 				lo.style = osc_styles.speedButton
 			end
 		end
@@ -2330,7 +2331,7 @@ function layoutPot()
 	lo.slider.gap = 7
 	lo.slider.tooltip_style = osc_styles.tooltip
 	lo.slider.tooltip_an = 2
-	lo.alpha[1] = 0
+	lo.alpha[1] = 80
 
 	-- Playback control buttons
 	
@@ -2430,7 +2431,7 @@ function layoutPot()
 			-- Cache
 			if user_opts.showCache then
 				lo = add_layout("cache")
-				lo.geometry = {x = osc_geo.w - (14 * gapSmallButton) - 5, y = refY - oscY - 1, an = 5, w = smallIconS, h = smallIconS}
+				lo.geometry = {x = osc_geo.w - (14 * gapSmallButton) - 5, y = refY - oscY + 1, an = 5, w = smallIconS, h = smallIconS}
 				lo.style = osc_styles.speedButton
 			end
 
@@ -2586,7 +2587,7 @@ function osc_init()
 		end
 	end
 	ne.slider.seekRangesF = function()
-		if user_opts.seekrangestyle == "none" then
+		if user_opts.seekrangestyle == "none" or (user_opts.seekrangestyle == "stream" and not state.isStreaming) then
 			return nil
 		end
 		local cache_state = state.cache_state
@@ -2763,6 +2764,9 @@ function osc_init()
 		ne.tooltip_style = osc_styles.tooltip
 		ne.tooltipF = function ()
 			local file = getDeltaPlaylistItem(-1)
+			if file == nil then
+				return ""
+			end
 			return file.label
 		end
 	end
@@ -2788,6 +2792,9 @@ function osc_init()
 		ne.tooltip_style = osc_styles.tooltip
 		ne.tooltipF = function ()
 			local file = getDeltaPlaylistItem(1)
+			if file == nil then
+				return ""
+			end
 			return file.label
 		end
 	end
@@ -3357,8 +3364,12 @@ function osc_init()
 		mp.commandv("add", "speed", -0.25) 
 	end
 
-	-- cache
+	-- check if streaming (to be moved somewhere else but too lazy)
+	local httpStream = utils.to_string(mp.command_native({"expand-text", "${path}"})):match("http")
+	user_opts.showCache = not (httpStream == nil)
+	state.isStreaming = not (httpStream == nil)
 
+	-- cache
 	if user_opts.showCache then
 		ne = new_element("cache", "button")
 		ne.visible = (osc_param.playresx >= user_opts.visibleButtonsW)
