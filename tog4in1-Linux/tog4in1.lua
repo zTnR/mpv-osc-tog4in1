@@ -15,13 +15,13 @@ local user_opts = {
 	showwindowed = true,				-- show OSC when windowed?
 	showfullscreen = true,				-- show OSC when fullscreen?
 	idlescreen = false,					-- show mpv logo on idle
-	--scalewindowed = 1.4,				-- scaling of the controller when windowed (vidscale true 4K)
-	--scalefullscreen = 0.9,			-- scaling of the controller when fullscreen (vidscale true 4K)
-	--scaleforcedwindow = 1,			-- scaling when rendered on a forced window (vidscale true 4K)
-	scalewindowed = 2.0,				-- scaling of the controller when windowed (vidscale false 4K)
-	scalefullscreen = 2.8,				-- scaling of the controller when fullscreen (vidscale false 4K)
-	scaleforcedwindow = 1,				-- scaling when rendered on a forced window (vidscale false 4K)
-	vidscale = false,					-- scale the controller with the video?
+	scalewindowed = 1.4,				-- scaling of the controller when windowed (vidscale true 4K)
+	scalefullscreen = 0.9,			-- scaling of the controller when fullscreen (vidscale true 4K)
+	scaleforcedwindow = 1,			-- scaling when rendered on a forced window (vidscale true 4K)
+	--scalewindowed = 2.0,				-- scaling of the controller when windowed (vidscale false 4K)
+	--scalefullscreen = 2.8,				-- scaling of the controller when fullscreen (vidscale false 4K)
+	--scaleforcedwindow = 1,				-- scaling when rendered on a forced window (vidscale false 4K)
+	vidscale = true,					-- scale the controller with the video?
 	boxalpha = 80,						-- opacity of the background box (thumbnail), 0 (opaque) to 255 (transparent)
 	alphaUntoggledButton = 120,			-- opacity untoggled button, 0 (opaque) to 255 (transparent)
 	alphaWinCtrl = 60,					-- opacity windows controls, 0 (opaque) to 255 (transparent)
@@ -784,6 +784,7 @@ local osc_styles = {
 	speedButton			= createStyle(0, 0, grey, white, 11, ""),
 	togIcon				= createStyle(0, 0, grey, white, 16, ""),
 	togIconBig			= createStyle(0, 0, grey, white, 20, ""),
+	togIconMini			= createStyle(0, 0, white, white, 18, ""),
 
 	timecodeL			= createStyle(0, 0, white, white, 13, user_opts.oscFont),
 	timecodeR			= createStyle(0, 0, grey, white, 13, user_opts.oscFont),
@@ -2323,7 +2324,7 @@ function layoutPot()
 	lo = add_layout("seekbar")
 	local hhh = refX - (refX - potRefX + offsetSeekbarLeft)
 	if minimalUI then
-		lo.geometry = {x = refX + 65, y = refY - oscY, an = 5, w = seekbarWidth, h = seekbarHeight}
+		lo.geometry = {x = refX + 65, y = refY - oscY + 2, an = 5, w = seekbarWidth, h = seekbarHeight}
 	else
 		lo.geometry = {x = refX, y = refY - oscY - 30, an = 5, w = seekbarWidth, h = seekbarHeight}
 	end
@@ -2336,8 +2337,13 @@ function layoutPot()
 	-- Playback control buttons
 	
 	lo = add_layout("playpause")
-	lo.geometry = {x = potRefX, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
-	lo.style = osc_styles.bigButtonsPot
+	if minimalUI then
+		lo.geometry = {x = potRefX, y = refY - oscY + 1, an = 5, w = smallIconS, h = smallIconS}
+		lo.style = osc_styles.togIconMini
+	else
+		lo.geometry = {x = potRefX, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
+		lo.style = osc_styles.bigButtonsPot
+	end
 		
 	lo = add_layout("pl_prev")
 	if user_opts.showChapters and not minimalUI then
@@ -2345,15 +2351,24 @@ function layoutPot()
 	else
 		lo.geometry = {x = potRefX + gapNavButton, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
 	end
-	lo.style = osc_styles.bigButtonsPot
+	if minimalUI then
+		lo.style = osc_styles.togIconMini
+		lo.geometry = {x = potRefX + gapNavButton, y = refY - oscY + 1, an = 5, w = smallIconS, h = smallIconS}
+	else
+		lo.style = osc_styles.bigButtonsPot
+	end
 
 	lo = add_layout("pl_next")
 	if user_opts.showChapters and not minimalUI then
 		lo.geometry = {x = potRefX + (4 * gapNavButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
 	else
-		lo.geometry = {x = potRefX + (2 * gapNavButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
+		lo.geometry = {x = potRefX + (2 * gapNavButton), y = refY - oscY + 1, an = 5, w = smallIconS, h = smallIconS}
 	end
-	lo.style = osc_styles.bigButtonsPot
+	if minimalUI then
+		lo.style = osc_styles.togIconMini
+	else
+		lo.style = osc_styles.bigButtonsPot
+	end
 	
 	if user_opts.showChapters and not minimalUI then
 		lo = add_layout("ch_prev")
@@ -2398,7 +2413,7 @@ function layoutPot()
 
 	lo = add_layout("cy_audio")
 	if minimalUI then
-		lo.geometry = {x = osc_geo.w - (2 * gapNavButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
+		lo.geometry = {x = osc_geo.w - (2 * gapNavButton), y = refY - oscY + 2, an = 5, w = smallIconS, h = smallIconS}
 	else
 		lo.geometry = {x = osc_geo.w - (5 * gapSmallButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
 	end
@@ -2406,7 +2421,7 @@ function layoutPot()
 
 	lo = add_layout("cy_sub")
 	if minimalUI then
-		lo.geometry = {x = osc_geo.w - gapNavButton, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
+		lo.geometry = {x = osc_geo.w - gapNavButton, y = refY - oscY + 2, an = 5, w = smallIconS, h = smallIconS}
 	else
 		lo.geometry = {x = osc_geo.w - (4 * gapSmallButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
 	end
