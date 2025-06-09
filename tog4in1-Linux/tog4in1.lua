@@ -15,17 +15,17 @@ local user_opts = {
 	showwindowed = true,				-- show OSC when windowed?
 	showfullscreen = true,				-- show OSC when fullscreen?
 	idlescreen = false,					-- show mpv logo on idle
-	scalewindowed = 1.4,				-- scaling of the controller when windowed (vidscale true 4K)
-	scalefullscreen = 0.9,			-- scaling of the controller when fullscreen (vidscale true 4K)
-	scaleforcedwindow = 1,			-- scaling when rendered on a forced window (vidscale true 4K)
-	--scalewindowed = 2.0,				-- scaling of the controller when windowed (vidscale false 4K)
-	--scalefullscreen = 2.8,				-- scaling of the controller when fullscreen (vidscale false 4K)
-	--scaleforcedwindow = 1,				-- scaling when rendered on a forced window (vidscale false 4K)
-	vidscale = true,					-- scale the controller with the video?
+	--scalewindowed = 1.4,				-- scaling of the controller when windowed (vidscale true 4K)
+	--scalefullscreen = 0.9,			-- scaling of the controller when fullscreen (vidscale true 4K)
+	--scaleforcedwindow = 1,			-- scaling when rendered on a forced window (vidscale true 4K)
+	scalewindowed = 2.0,				-- scaling of the controller when windowed (vidscale false 4K)
+	scalefullscreen = 2.8,				-- scaling of the controller when fullscreen (vidscale false 4K)
+	scaleforcedwindow = 1,				-- scaling when rendered on a forced window (vidscale false 4K)
+	vidscale = false,					-- scale the controller with the video?
 	boxalpha = 80,						-- opacity of the background box (thumbnail), 0 (opaque) to 255 (transparent)
 	alphaUntoggledButton = 120,			-- opacity untoggled button, 0 (opaque) to 255 (transparent)
 	alphaWinCtrl = 60,					-- opacity windows controls, 0 (opaque) to 255 (transparent)
-	seekrangealpha = 180,				-- transparency of seekranges (cache preload)
+	seekrangealpha = 64,				-- transparency of seekranges
 	seekbarhandlesize = 0,				-- size ratio of the knob handle
 	seekbarkeyframes = true,			-- use keyframes when dragging the seekbar
 	hidetimeout = 0,					-- duration in ms until the OSC hides (case "don't show on mouse move")
@@ -48,7 +48,7 @@ local user_opts = {
 	showonseek = false,					-- show OSC when seeking
 	oscFont = "Play",					-- font for OSC
 	tick_delay = 1 / 60,				-- minimum interval between OSC redraws in seconds
-	seekrangestyle = "stream",			-- display demuxer cache in seekbar (none / stream / always)
+	seekrangestyle = "none",			-- display demuxer cache in seekbar
 	tick_delay_follow_display_fps = false, -- use display fps as the minimum interval
 
 	-- tog4in1
@@ -779,12 +779,12 @@ local osc_styles = {
 
 	bigButtons			= createStyle(0, 0, white, white, 30, ""),
 	bigButtonsPot		= createStyle(0, 0, white, white, 24, ""),
+	miniButtonsPot		= createStyle(0, 0, white, white, 19, ""),
 	mediumButtons		= createStyle(0, 0, grey, white, 16, ""),
 	mediumButtonsBig	= createStyle(0, 0, grey, white, 24, ""),
 	speedButton			= createStyle(0, 0, grey, white, 11, ""),
 	togIcon				= createStyle(0, 0, grey, white, 16, ""),
 	togIconBig			= createStyle(0, 0, grey, white, 20, ""),
-	togIconMini			= createStyle(0, 0, white, white, 18, ""),
 
 	timecodeL			= createStyle(0, 0, white, white, 13, user_opts.oscFont),
 	timecodeR			= createStyle(0, 0, grey, white, 13, user_opts.oscFont),
@@ -868,7 +868,6 @@ local state = {
 	osd = mp.create_osd_overlay("ass-events"),
 	chapter_list = {},						-- sorted by time
 	lastvisibility = user_opts.visibility,	-- save last visibility on pause if showonpause
-	isStreaming = false						-- current file is a stream
 }
 
 local thumbfast = {
@@ -1488,7 +1487,7 @@ function render_elements(master_ass)
 						if osd_w and not thumbfast.disabled then
 							local r_w, r_h = get_virt_scale_factor()
 
-							local thumbPad = 4
+							local thumbPad = 1
 							local thumbMarginX = 18 / r_w
 							local thumbMarginY = 15
 							local tooltipBgColor = "000000"
@@ -2182,7 +2181,7 @@ function layout()
 		if user_opts.showIcons then
 			if user_opts.showCache then
 				lo = add_layout("cache")
-				lo.geometry = {x = 190, y = refY - oscY - 0.5, an = 5, w = 30, h = smallIconS}
+				lo.geometry = {x = 185, y = refY - oscY - 1.5, an = 5, w = 30, h = smallIconS}
 				lo.style = osc_styles.speedButton
 			end
 		end
@@ -2285,10 +2284,10 @@ function layoutPot()
 	
 	-- offsets minimal interface
 	if minimalUI then
-		potRefX = 10
+		potRefX = 15
 		gapNavButton = 20
 		oscY = 15
-		offsetSeekbarLeft = (3 * gapNavButton) + 125 - potRefX
+		offsetSeekbarLeft = (3 * gapNavButton) + 150 - potRefX
 		seekbarWidth = seekbarWidth - offsetSeekbarLeft - potRefX - gapNavButton
 		seekbarBgAlpha = 255
 	end
@@ -2300,11 +2299,13 @@ function layoutPot()
 	lo.geometry = {x = posX, y = posY, an = 7, w = osc_geo.w, h = 10}
 	if minimalUI then
 		lo.style = osc_styles.transBgPotMini
+		lo.alpha[3] = 100
 	else
 		lo.style = osc_styles.transBgPot
+		lo.alpha[3] = 50
 	end
 	lo.layer = 10
-	lo.alpha[3] = 0
+	-- lo.alpha[3] = 255
 
 	-- Seekbar
 
@@ -2324,50 +2325,44 @@ function layoutPot()
 	lo = add_layout("seekbar")
 	local hhh = refX - (refX - potRefX + offsetSeekbarLeft)
 	if minimalUI then
-		lo.geometry = {x = refX + 65, y = refY - oscY + 2, an = 5, w = seekbarWidth, h = seekbarHeight}
+		lo.geometry = {x = refX + 52, y = refY - oscY + 1, an = 5, w = seekbarWidth, h = seekbarHeight}
+		lo.alpha[1] = 100
 	else
 		lo.geometry = {x = refX, y = refY - oscY - 30, an = 5, w = seekbarWidth, h = seekbarHeight}
+		lo.alpha[1] = 50
 	end
 	lo.style = osc_styles.seekbarFg
 	lo.slider.gap = 7
 	lo.slider.tooltip_style = osc_styles.tooltip
 	lo.slider.tooltip_an = 2
-	lo.alpha[1] = 80
+	-- lo.alpha[1] = 0
 
 	-- Playback control buttons
 	
 	lo = add_layout("playpause")
+	lo.geometry = {x = potRefX, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
 	if minimalUI then
-		lo.geometry = {x = potRefX, y = refY - oscY + 1, an = 5, w = smallIconS, h = smallIconS}
-		lo.style = osc_styles.togIconMini
+		lo.style = osc_styles.miniButtonsPot
 	else
-		lo.geometry = {x = potRefX, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
 		lo.style = osc_styles.bigButtonsPot
 	end
-		
+
 	lo = add_layout("pl_prev")
 	if user_opts.showChapters and not minimalUI then
 		lo.geometry = {x = potRefX + (3 * gapNavButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
+	lo.style = osc_styles.bigButtonsPot
 	else
 		lo.geometry = {x = potRefX + gapNavButton, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
-	end
-	if minimalUI then
-		lo.style = osc_styles.togIconMini
-		lo.geometry = {x = potRefX + gapNavButton, y = refY - oscY + 1, an = 5, w = smallIconS, h = smallIconS}
-	else
-		lo.style = osc_styles.bigButtonsPot
+		lo.style = osc_styles.miniButtonsPot
 	end
 
 	lo = add_layout("pl_next")
 	if user_opts.showChapters and not minimalUI then
 		lo.geometry = {x = potRefX + (4 * gapNavButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
+	lo.style = osc_styles.bigButtonsPot
 	else
-		lo.geometry = {x = potRefX + (2 * gapNavButton), y = refY - oscY + 1, an = 5, w = smallIconS, h = smallIconS}
-	end
-	if minimalUI then
-		lo.style = osc_styles.togIconMini
-	else
-		lo.style = osc_styles.bigButtonsPot
+		lo.geometry = {x = potRefX + (2 * gapNavButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
+		lo.style = osc_styles.miniButtonsPot
 	end
 	
 	if user_opts.showChapters and not minimalUI then
@@ -2408,12 +2403,21 @@ function layoutPot()
 		lo.geometry = {x = potRefX + (3 * gapNavButton) + 56, y = refY - oscY + 1, an = 4, w = 50, h = smallIconS}
 	end
 	lo.style = osc_styles.timecodeR
-	
+
+	-- Toggle Ontop
+	lo = add_layout("tog_ontop")
+	if minimalUI then
+		lo.geometry = {x = osc_geo.w - (3 * gapNavButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
+	else
+		lo.geometry = {x = osc_geo.w - (6 * gapSmallButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
+	end
+	lo.style = osc_styles.togIcon
+
 	-- Audio / Subs
 
 	lo = add_layout("cy_audio")
 	if minimalUI then
-		lo.geometry = {x = osc_geo.w - (2 * gapNavButton), y = refY - oscY + 2, an = 5, w = smallIconS, h = smallIconS}
+		lo.geometry = {x = osc_geo.w - (2 * gapNavButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
 	else
 		lo.geometry = {x = osc_geo.w - (5 * gapSmallButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
 	end
@@ -2421,7 +2425,7 @@ function layoutPot()
 
 	lo = add_layout("cy_sub")
 	if minimalUI then
-		lo.geometry = {x = osc_geo.w - gapNavButton, y = refY - oscY + 2, an = 5, w = smallIconS, h = smallIconS}
+		lo.geometry = {x = osc_geo.w - gapNavButton, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
 	else
 		lo.geometry = {x = osc_geo.w - (4 * gapSmallButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
 	end
@@ -2446,7 +2450,7 @@ function layoutPot()
 			-- Cache
 			if user_opts.showCache then
 				lo = add_layout("cache")
-				lo.geometry = {x = osc_geo.w - (14 * gapSmallButton) - 5, y = refY - oscY + 1, an = 5, w = smallIconS, h = smallIconS}
+				lo.geometry = {x = osc_geo.w - (14 * gapSmallButton) - 5, y = refY - oscY - 1, an = 5, w = smallIconS, h = smallIconS}
 				lo.style = osc_styles.speedButton
 			end
 
@@ -2475,14 +2479,9 @@ function layoutPot()
 			lo.geometry = {x = osc_geo.w - (8 * gapSmallButton), y = refY - oscY - 1, an = 5, w = smallIconS, h = smallIconS}
 			lo.style = osc_styles.togIcon
 
-			-- Toggle Ontop
-			lo = add_layout("tog_ontop")
-			lo.geometry = {x = osc_geo.w - (7 * gapSmallButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
-			lo.style = osc_styles.togIcon
-
 			-- Volume
 			lo = add_layout("volume")
-			lo.geometry = {x = osc_geo.w - (6 * gapSmallButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
+			lo.geometry = {x = osc_geo.w - (7 * gapSmallButton), y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
 			lo.style = osc_styles.togIcon
 
 		end
@@ -2602,7 +2601,7 @@ function osc_init()
 		end
 	end
 	ne.slider.seekRangesF = function()
-		if user_opts.seekrangestyle == "none" or (user_opts.seekrangestyle == "stream" and not state.isStreaming) then
+		if user_opts.seekrangestyle == "none" then
 			return nil
 		end
 		local cache_state = state.cache_state
@@ -2779,9 +2778,6 @@ function osc_init()
 		ne.tooltip_style = osc_styles.tooltip
 		ne.tooltipF = function ()
 			local file = getDeltaPlaylistItem(-1)
-			if file == nil then
-				return ""
-			end
 			return file.label
 		end
 	end
@@ -2807,9 +2803,6 @@ function osc_init()
 		ne.tooltip_style = osc_styles.tooltip
 		ne.tooltipF = function ()
 			local file = getDeltaPlaylistItem(1)
-			if file == nil then
-				return ""
-			end
 			return file.label
 		end
 	end
@@ -3379,12 +3372,8 @@ function osc_init()
 		mp.commandv("add", "speed", -0.25) 
 	end
 
-	-- check if streaming (to be moved somewhere else but too lazy)
-	local httpStream = utils.to_string(mp.command_native({"expand-text", "${path}"})):match("http")
-	user_opts.showCache = not (httpStream == nil)
-	state.isStreaming = not (httpStream == nil)
-
 	-- cache
+
 	if user_opts.showCache then
 		ne = new_element("cache", "button")
 		ne.visible = (osc_param.playresx >= user_opts.visibleButtonsW)
