@@ -25,7 +25,7 @@ local user_opts = {
 	boxalpha = 80,						-- opacity of the background box (thumbnail), 0 (opaque) to 255 (transparent)
 	alphaUntoggledButton = 120,			-- opacity untoggled button, 0 (opaque) to 255 (transparent)
 	alphaWinCtrl = 60,					-- opacity windows controls, 0 (opaque) to 255 (transparent)
-	seekrangealpha = 64,				-- transparency of seekranges
+	seekrangealpha = 180,				-- transparency of seekranges
 	seekbarhandlesize = 0,				-- size ratio of the knob handle
 	seekbarkeyframes = true,			-- use keyframes when dragging the seekbar
 	hidetimeout = 0,					-- duration in ms until the OSC hides (case "don't show on mouse move")
@@ -48,7 +48,7 @@ local user_opts = {
 	showonseek = false,					-- show OSC when seeking
 	oscFont = "Play",					-- font for OSC
 	tick_delay = 1 / 60,				-- minimum interval between OSC redraws in seconds
-	seekrangestyle = "none",			-- display demuxer cache in seekbar
+	seekrangestyle = "stream",			-- display demuxer cache in seekbar(none, streal, always)
 	tick_delay_follow_display_fps = false, -- use display fps as the minimum interval
 
 	-- tog4in1
@@ -57,7 +57,7 @@ local user_opts = {
 	minimalUI = false,					-- Minimal UI (chapters disabled)
 	UIAllWhite = false,					-- UI all white (no grey buttons / text)
 	saveFile = true,					-- Minimal UI (chapters disabled)
-	minimalSeekY = 30,					-- Height minimal UI
+	minimalSeekY = 0,					-- Height minimal UI
 	jumpValue = 5,						-- Default jump value in s (From OSC only)
 	smallIcon = 20,						-- Dimensions in px of small icons
 	seekbarColorIndex = 4,				-- Default OSC seekbar color (osc_palette)
@@ -770,7 +770,7 @@ end
 -- osc styles - params : blur, bord, color1, color2, font size, icon
 local osc_styles = {
 	transBg				= createStyle(75, 100, black, black, nil, nil),
-	transBgMini			= createStyle(75, 75, black, black, nil, nil),
+	transBgMini			= createStyle(75, 0, black, black, nil, nil),
 	transBgPot			= createStyle(0, 70, black, black, nil, nil),
 	transBgPotMini		= createStyle(0, 30, black, black, nil, nil),
 	seekbarBg			= createStyle(0, 0, white, white, nil, nil),
@@ -788,14 +788,14 @@ local osc_styles = {
 
 	timecodeL			= createStyle(0, 0, white, white, 13, user_opts.oscFont),
 	timecodeR			= createStyle(0, 0, grey, white, 13, user_opts.oscFont),
-	titlePotMini		= createStyle(0, 0, grey, white, 14, user_opts.oscFont),
+	titlePotMini		= createStyle(0, 0, grey, white, 13, user_opts.oscFont),
 	tooltip				= createStyle(0, 0, white, black, 10, user_opts.oscFont),
 	vidTitle			= createStyle(0, 0, white, white, 12, user_opts.oscFont),
 
-	wcButtons			= createStyle(0, 0, white, white, 15, ""),
-	wcTitle				= createStyle(0, 0, white, white, 14, user_opts.oscFont),
+	wcButtons			= createStyle(0, 0, white, white, 13, ""),
+	wcTitle				= createStyle(0, 0, white, white, 13, user_opts.oscFont),
 	wcBar				= createStyle(0, 0, black, black, nil, nil),
-	
+
 	elementDown = "{\\1c&H" .. black .. "&}",
 }
 
@@ -868,6 +868,7 @@ local state = {
 	osd = mp.create_osd_overlay("ass-events"),
 	chapter_list = {},						-- sorted by time
 	lastvisibility = user_opts.visibility,	-- save last visibility on pause if showonpause
+	isStreaming = false						-- current file is a stream
 }
 
 local thumbfast = {
@@ -2016,7 +2017,7 @@ function layout()
 	local yMinimalIcons = 0
 	if minimalUI then
 		minimalSeekY = user_opts.minimalSeekY
-		yMinimalSeekW = osc_geo.w / 3
+		yMinimalSeekW = osc_geo.w / 8
 		yMinimalIcons = minimalSeekY - 30
 	end
 
@@ -2061,25 +2062,7 @@ function layout()
 	lo.slider.gap = 7
 	lo.slider.tooltip_style = osc_styles.tooltip
 	lo.slider.tooltip_an = 2
-
-	-- Timecodes
-
-	lo = add_layout("tc_left")
-	if minimalUI then
-		lo.geometry = {x = refX - xMinimalIcons - 95, y = refY - oscY - 37 + minimalSeekY, an = 7, w = 50, h = smallIconS}
-	else
-		lo.geometry = {x = 27, y = refY - oscY - 37 + minimalSeekY, an = 7, w = 50, h = smallIconS}
-	end
-	lo.style = osc_styles.timecodeL
-
-	lo = add_layout("tc_right")
-	if minimalUI then
-		lo.geometry = {x = refX + xMinimalIcons + 50, y = refY - oscY - 37 + minimalSeekY, an = 7, w = 50, h = 200}
-	else
-		lo.geometry = {x = osc_geo.w - 25, y = refY - oscY - 37 + minimalSeekY, an = 9, w = 50, h = smallIconS}
-	end
-	lo.style = osc_styles.timecodeR
-
+	
 	-- Playlist control buttons
 
 	local prevnextPos = (2 * gapNavButton)
@@ -2089,7 +2072,7 @@ function layout()
 
 	lo = add_layout("pl_prev")
 	if minimalUI then
-		lo.geometry = {x = refX - xMinimalIcons - 15, y = refY - oscY + yMinimalIcons, an = 5, w = smallIconS, h = smallIconS}
+		lo.geometry = {x = refX - xMinimalIcons - 15, y = refY - oscY + yMinimalIcons - 1, an = 5, w = smallIconS, h = smallIconS}
 	else
 		lo.geometry = {x = refX - prevnextPos, y = refY - oscY + yMinimalIcons, an = 5, w = smallIconS, h = smallIconS}
 	end
@@ -2097,32 +2080,34 @@ function layout()
 
 	lo = add_layout("pl_next")
 	if minimalUI then
-		lo.geometry = {x = refX + xMinimalIcons + 15, y = refY - oscY + yMinimalIcons, an = 5, w = smallIconS, h = smallIconS}
+		lo.geometry = {x = refX + xMinimalIcons + 15, y = refY - oscY + yMinimalIcons - 1, an = 5, w = smallIconS, h = smallIconS}
 	else
 		lo.geometry = {x = refX + prevnextPos, y = refY - oscY + yMinimalIcons, an = 5, w = smallIconS, h = smallIconS}
 	end
 	lo.style = osc_styles.mediumButtonsBig
 
-	-- Audio tracks
-	lo = add_layout("cy_audio")
-	if minimalUI then
-		lo.geometry = {x = refX - xMinimalIcons - oscY - 5, y = refY - oscY + yMinimalIcons, an = 5, w = smallIconS, h = smallIconS}
-	else
-		lo.geometry = {x = 60, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
-	end
-	lo.style = osc_styles.togIcon
-
-	-- Subtitle tracks
-	lo = add_layout("cy_sub")
-	if minimalUI then
-		lo.geometry = {x = refX + xMinimalIcons + oscY + 5, y = refY - oscY + yMinimalIcons, an = 5, w = smallIconS, h = smallIconS}
-	else
-		lo.geometry = {x = 85, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
-	end
-	lo.style = osc_styles.togIcon
-
 	-- If not minimal UI all other buttons
 	if not minimalUI then
+
+		-- Timecodes
+
+		lo = add_layout("tc_left")
+		lo.geometry = {x = 27, y = refY - oscY - 37 + minimalSeekY, an = 7, w = 50, h = smallIconS}
+		lo.style = osc_styles.timecodeL
+
+		lo = add_layout("tc_right")
+		lo.geometry = {x = osc_geo.w - 25, y = refY - oscY - 37 + minimalSeekY, an = 9, w = 50, h = smallIconS}
+		lo.style = osc_styles.timecodeR
+
+		-- Audio tracks
+		lo = add_layout("cy_audio")
+		lo.geometry = {x = 60, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
+		lo.style = osc_styles.togIcon
+
+		-- Subtitle tracks
+		lo = add_layout("cy_sub")
+		lo.geometry = {x = 85, y = refY - oscY, an = 5, w = smallIconS, h = smallIconS}
+		lo.style = osc_styles.togIcon
 
 		-- Title
 		geo = {x = 27, y = refY - oscY - 50, an = 1, w = osc_geo.w - 50, h = 48}
@@ -2181,7 +2166,7 @@ function layout()
 		if user_opts.showIcons then
 			if user_opts.showCache then
 				lo = add_layout("cache")
-				lo.geometry = {x = 185, y = refY - oscY - 1.5, an = 5, w = 30, h = smallIconS}
+				lo.geometry = {x = 190, y = refY - oscY - 1.5, an = 5, w = 30, h = smallIconS}
 				lo.style = osc_styles.speedButton
 			end
 		end
@@ -2312,7 +2297,7 @@ function layoutPot()
 	new_element("bgBar", "box")
 	lo = add_layout("bgBar")
 	if minimalUI then
-		lo.geometry = {x = potRefX + offsetSeekbarLeft, y = refY - oscY, an = 7, w = seekbarWidth, h = bgBarHeight}
+		lo.geometry = {x = refX + 52, y = refY - oscY, an = 5, w = seekbarWidth, h = bgBarHeight}
 	else
 		lo.geometry = {x = refX, y = refY - oscY - 30, an = 5, w = seekbarWidth, h = bgBarHeight}
 	end
@@ -2323,19 +2308,18 @@ function layoutPot()
 	osc_styles.seekbarFg = createStyle(0, 0, osc_palette[user_opts.seekbarColorIndex], white, nil, nil)
 
 	lo = add_layout("seekbar")
-	local hhh = refX - (refX - potRefX + offsetSeekbarLeft)
 	if minimalUI then
 		lo.geometry = {x = refX + 52, y = refY - oscY + 1, an = 5, w = seekbarWidth, h = seekbarHeight}
-		lo.alpha[1] = 100
+		--lo.alpha[1] = 100
 	else
 		lo.geometry = {x = refX, y = refY - oscY - 30, an = 5, w = seekbarWidth, h = seekbarHeight}
-		lo.alpha[1] = 50
+		--lo.alpha[1] = 50
 	end
 	lo.style = osc_styles.seekbarFg
 	lo.slider.gap = 7
 	lo.slider.tooltip_style = osc_styles.tooltip
 	lo.slider.tooltip_an = 2
-	-- lo.alpha[1] = 0
+	lo.alpha[1] = 50
 
 	-- Playback control buttons
 	
@@ -2450,7 +2434,7 @@ function layoutPot()
 			-- Cache
 			if user_opts.showCache then
 				lo = add_layout("cache")
-				lo.geometry = {x = osc_geo.w - (14 * gapSmallButton) - 5, y = refY - oscY - 1, an = 5, w = smallIconS, h = smallIconS}
+				lo.geometry = {x = osc_geo.w - (14 * gapSmallButton) - 5, y = refY - oscY + 1, an = 5, w = smallIconS, h = smallIconS}
 				lo.style = osc_styles.speedButton
 			end
 
@@ -2601,7 +2585,7 @@ function osc_init()
 		end
 	end
 	ne.slider.seekRangesF = function()
-		if user_opts.seekrangestyle == "none" then
+		if user_opts.seekrangestyle == "none" or (user_opts.seekrangestyle == "stream" and not state.isStreaming) then
 			return nil
 		end
 		local cache_state = state.cache_state
@@ -2648,6 +2632,13 @@ function osc_init()
 	ne.eventresponder["mbtn_right_up"] = function () -- right clic : switch chapter mode on / off
 		if not minimalUI then
 			user_opts.showChapters = not user_opts.showChapters
+			request_init()
+		elseif user_opts.modernTog and minimalUI then
+			if user_opts.seekbarColorIndex == #osc_palette then
+				user_opts.seekbarColorIndex = 1
+			else
+				user_opts.seekbarColorIndex = user_opts.seekbarColorIndex + 1
+			end
 			request_init()
 		end
 	end
@@ -2748,22 +2739,6 @@ function osc_init()
 		user_opts.minimalUI = not user_opts.minimalUI
 		request_init()
 	end
-	ne.eventresponder["wheel_up_press"] = function () -- wheel : move bar up / down in minimal UI mode
-		if minimalUI and user_opts.modernTog then
-			if user_opts.minimalSeekY > 0 then
-				user_opts.minimalSeekY = user_opts.minimalSeekY - 1
-			end
-			request_init()
-		end
-	end
-	ne.eventresponder["wheel_down_press"] = function () -- wheel : move bar up / down in minimal UI mode
-		if minimalUI and user_opts.modernTog then
-			if user_opts.minimalSeekY < 50 then
-				user_opts.minimalSeekY = user_opts.minimalSeekY + 1
-			end
-			request_init()
-		end
-	end
 
 	--
 	-- playlist buttons
@@ -2778,6 +2753,9 @@ function osc_init()
 		ne.tooltip_style = osc_styles.tooltip
 		ne.tooltipF = function ()
 			local file = getDeltaPlaylistItem(-1)
+			if file == nil then
+				return ""
+			end
 			return file.label
 		end
 	end
@@ -2803,6 +2781,9 @@ function osc_init()
 		ne.tooltip_style = osc_styles.tooltip
 		ne.tooltipF = function ()
 			local file = getDeltaPlaylistItem(1)
+			if file == nil then
+				return ""
+			end
 			return file.label
 		end
 	end
@@ -2816,7 +2797,28 @@ function osc_init()
 		show_message(get_playlist(), 10) 
 	end
 	ne.eventresponder["mbtn_right_up"] = function ()
-		show_message(get_playlist(), 3) 
+		if user_opts.modernTog and minimalUI then
+			user_opts.minimalUI = not user_opts.minimalUI
+			request_init()
+		else
+			show_message(get_playlist(), 3) 
+		end
+	end
+	ne.eventresponder["wheel_up_press"] = function () -- wheel : move bar up / down in minimal UI mode
+		if minimalUI and user_opts.modernTog then
+			if user_opts.minimalSeekY > 0 then
+				user_opts.minimalSeekY = user_opts.minimalSeekY - 1
+			end
+			request_init()
+		end
+	end
+	ne.eventresponder["wheel_down_press"] = function () -- wheel : move bar up / down in minimal UI mode
+		if minimalUI and user_opts.modernTog then
+			if user_opts.minimalSeekY < 50 then
+				user_opts.minimalSeekY = user_opts.minimalSeekY + 1
+			end
+			request_init()
+		end
 	end
 
 	--
@@ -3373,6 +3375,11 @@ function osc_init()
 	end
 
 	-- cache
+	
+	-- check if streaming (to be moved somewhere else but too lazy)More actions
+	local httpStream = utils.to_string(mp.command_native({"expand-text", "${path}"})):match("http")
+	user_opts.showCache = not (httpStream == nil)
+	state.isStreaming = not (httpStream == nil)
 
 	if user_opts.showCache then
 		ne = new_element("cache", "button")
