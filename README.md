@@ -102,6 +102,14 @@ Config folders :
 - Toggle audio      > Right clic      : Previous audio track + OSD List
 ```
 
+### Modern Mini Only
+
+```
+- Seekbar           > Right click      : Switch colors
+- Next file         > Mouse wheel      : Move Seekbar up / down
+- Next file         > Right click      : Exit minimal UI
+```
+
 # Specifics
 
 Parameters in _user_opts_
